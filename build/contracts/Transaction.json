@@ -1,0 +1,148 @@
+{
+  "contract_name": "Transaction",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "releaseFundsWhenBothSigned",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "storeLedgersInIpfs",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getInitialTransactionData",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "name": "",
+          "type": "address"
+        },
+        {
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "name": "",
+          "type": "address"
+        },
+        {
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "_amountPaidWei",
+          "type": "uint256"
+        },
+        {
+          "name": "_buyerName",
+          "type": "bytes32"
+        },
+        {
+          "name": "_buyerAddress",
+          "type": "address"
+        },
+        {
+          "name": "_buyerEmail",
+          "type": "bytes32"
+        },
+        {
+          "name": "_buyerCashLedgerAddress",
+          "type": "bytes32"
+        },
+        {
+          "name": "_buyerAssetsLedgerAddress",
+          "type": "bytes32"
+        },
+        {
+          "name": "_buyerGpsLocation",
+          "type": "bytes32"
+        },
+        {
+          "name": "_buyerVatNumber",
+          "type": "uint256"
+        },
+        {
+          "name": "_sellerName",
+          "type": "bytes32"
+        },
+        {
+          "name": "_sellerAddress",
+          "type": "address"
+        },
+        {
+          "name": "_sellerEmail",
+          "type": "bytes32"
+        },
+        {
+          "name": "_quantityBought",
+          "type": "uint256"
+        },
+        {
+          "name": "_pricePerItem",
+          "type": "uint256"
+        },
+        {
+          "name": "_invoiceHashAddress",
+          "type": "bytes32"
+        }
+      ],
+      "payable": false,
+      "type": "constructor"
+    }
+  ],
+  "unlinked_binary": "0x6060604052341561000c57fe5b6040516101c08061027283398101604090815281516020830151918301516060840151608085015160a086015160c087015160e08801516101008901516101208a01516101408b01516101608c01516101808d01516101a0909d01519a9c999a989997989697959694959394929391929091905b42600e5560108e905560078d905560088054600160a060020a03808f16600160a060020a03199283161790925560098d9055600a8c9055600b8b9055600c8a9055600d899055600088905560018054928816929091169190911790556002849055600f839055601182905560138190555b50505050505050505050505050505b6101638061010f6000396000f300606060405263ffffffff60e060020a60003504166356f464ea811461003757806371393c6014610037578063862abace1461005b575bfe5b341561003f57fe5b6100476100ea565b005b341561003f57fe5b6100476100ea565b005b341561006357fe5b61006b6100f0565b604080519d8e52600160a060020a039c8d1660208f01528d81019b909b5260608d019990995260808c019790975260a08b019590955260c08a019390935260e089019190915290951661010087015261012086019490945261014085019390935261016084019290925261018083019190915251908190036101a00190f35b5b565b5b565b600754600854600954600a54600b54600c54600d54600054600154600254600f54601154601354600160a060020a039b8c169b909416935b909192939495969798999a9b9c5600a165627a7a72305820674161906d89d4b322892db163ad09d967048c4995b7f6f791955a95dc64f40d0029",
+  "networks": {},
+  "schema_version": "0.0.5",
+  "updated_at": 1503056776958
+}
