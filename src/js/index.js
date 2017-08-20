@@ -6,7 +6,8 @@ import IPFS from 'ipfs'
 import BuyerForm from './BuyerForm.js'
 import SellerForm from './SellerForm.js'
 import temporaryContract from './../temporaryContract.json'
-import bs58 from 'bs58'
+
+const signReturnUrl = 'http://localhost:8080/return-url'
 
 class App extends React.Component {
    constructor(props){
@@ -34,16 +35,17 @@ class App extends React.Component {
    initState(cb){
       if(typeof web3 != 'undefined'){
          l("Using web3 detected from external source like Metamask")
+
          window.web3 = new Web3(web3.currentProvider)
+         window.ipfs = new IPFS()
+
          this.setState({
-            ipfs: new IPFS(),
             ContractInstance: web3.eth.contract(temporaryContract.abiManager).at(temporaryContract.address)
          }, () => {
-            this.state.ipfs.on('ready', () => {
+            ipfs.on('ready', () => {
                l("IPFS node is ready")
+               cb()
             })
-
-            cb()
          })
       }else{
          alert('This is a descentralized application, you must connect to the blockchain either by using Metamask or Mist. Right now you aren\'t connected. You\'ll be able to use this Dapp when connected')
@@ -56,13 +58,13 @@ class App extends React.Component {
 
          // If the cash ledger address is empty, then generate a new one with the cash indicated
          if(data.buyerCashLedgerHashAddress.length <= 0 && data.buyerAssetsLedgerHashAddress.length <= 0){
-            this.state.ipfs.files.add(
-               new this.state.ipfs.types.Buffer(newCashLedgerAmount)
+            ipfs.files.add(
+               new ipfs.types.Buffer(newCashLedgerAmount)
             ).then(results => {
                data.buyerCashLedgerHashAddress = results[0].hash
 
-               this.state.ipfs.files.add(
-                  new this.state.ipfs.types.Buffer(newAssetsLedgerAmount)
+               ipfs.files.add(
+                  new ipfs.types.Buffer(newAssetsLedgerAmount)
                ).then(results => {
                   data.buyerAssetsLedgerHashAddress = results[0].hash
 
@@ -70,16 +72,16 @@ class App extends React.Component {
                })
             })
          }else if(data.buyerCashLedgerHashAddress.length <= 0){
-            this.state.ipfs.files.add(
-               new this.state.ipfs.types.Buffer(newCashLedgerAmount)
+            ipfs.files.add(
+               new ipfs.types.Buffer(newCashLedgerAmount)
             ).then(results => {
                data.buyerCashLedgerHashAddress = results[0].hash
 
                cb()
             })
          }else if(data.buyerAssetsLedgerHashAddress.length <= 0){
-            this.state.ipfs.files.add(
-               new this.state.ipfs.types.Buffer(newAssetsLedgerAmount)
+            ipfs.files.add(
+               new ipfs.types.Buffer(newAssetsLedgerAmount)
             ).then(results => {
                data.buyerAssetsLedgerHashAddress = results[0].hash
 
@@ -95,8 +97,8 @@ class App extends React.Component {
          l('Adding invoice to IPFS')
          l(invoice)
 
-         this.state.ipfs.files.add(
-            new this.state.ipfs.types.Buffer(invoice)
+         ipfs.files.add(
+            new ipfs.types.Buffer(invoice)
          ).then(invoiceHashAddress => {
 
             // This is how solidity will receive the data
@@ -231,6 +233,7 @@ class App extends React.Component {
    submitSellerForm(data, newCashLedgerAmount, newAssetsLedgerAmount){
 
       l(data)
+      let combinedData
 
       // 1
       const updateIPFSInvoice = cb => {
@@ -238,13 +241,13 @@ class App extends React.Component {
 
             // If the cash ledger address is empty, then generate a new one with the cash indicated
             if(data.sellerCashLedgerHashAddress.length <= 0 && data.sellerAssetsLedgerHashAddress.length <= 0){
-               this.state.ipfs.files.add(
-                  new this.state.ipfs.types.Buffer(newCashLedgerAmount)
+               ipfs.files.add(
+                  new ipfs.types.Buffer(newCashLedgerAmount)
                ).then(results => {
                   data.sellerCashLedgerHashAddress = results[0].hash
 
-                  this.state.ipfs.files.add(
-                     new this.state.ipfs.types.Buffer(newAssetsLedgerAmount)
+                  ipfs.files.add(
+                     new ipfs.types.Buffer(newAssetsLedgerAmount)
                   ).then(results => {
                      data.sellerAssetsLedgerHashAddress = results[0].hash
 
@@ -252,16 +255,16 @@ class App extends React.Component {
                   })
                })
             }else if(data.sellerCashLedgerHashAddress.length <= 0){
-               this.state.ipfs.files.add(
-                  new this.state.ipfs.types.Buffer(newCashLedgerAmount)
+               ipfs.files.add(
+                  new ipfs.types.Buffer(newCashLedgerAmount)
                ).then(results => {
                   data.sellerCashLedgerHashAddress = results[0].hash
 
                   cb()
                })
             }else if(data.sellerAssetsLedgerHashAddress.length <= 0){
-               this.state.ipfs.files.add(
-                  new this.state.ipfs.types.Buffer(newAssetsLedgerAmount)
+               ipfs.files.add(
+                  new ipfs.types.Buffer(newAssetsLedgerAmount)
                ).then(results => {
                   data.sellerAssetsLedgerHashAddress = results[0].hash
 
@@ -277,17 +280,17 @@ class App extends React.Component {
                invoiceHash = web3.toUtf8(invoiceHash)
 
                // Read current invoice data
-               this.state.ipfs.files.cat(invoiceHash, (err, stream) => {
+               ipfs.files.cat(invoiceHash, (err, stream) => {
                   stream.on('data', file => {
                      let fileContent = new TextDecoder('utf-8').decode(file)
                      let invoiceData = JSON.parse(fileContent)
-                     let combinedData = {...invoiceData, ...data}
+                     combinedData = {...invoiceData, ...data}
 
                      l('Combined data')
                      l(combinedData)
 
-                     this.state.ipfs.files.add(
-                        new this.state.ipfs.types.Buffer(JSON.stringify(combinedData))
+                     ipfs.files.add(
+                        new ipfs.types.Buffer(JSON.stringify(combinedData))
                      ).then(invoiceHashAddress => {
 
                         cb(invoiceHashAddress[0].hash)
@@ -305,42 +308,61 @@ class App extends React.Component {
       }
 
       // 2
-      const updateInvoiceInstance = (invoiceHash, cb) => {
+      const signIPFSInvoice = invoiceHash => {
+         const postBody = {
+            fileContent: btoa(combinedData), // Convert data to base64
+            firstEmail: combinedData.sellerEmail,
+            firstName: combinedData.sellerName,
+            secondEmail: combinedData.buyerEmail,
+            secondName: combinedData.buyerName,
+         }
 
-         // Generate the smart contract instance and save the hash address of the invoice
-         this.state.ContractInstance.completeSellerInvoiceData(
-            this.state.TransactionInstance.address,
-            data.sellerAssetsLedgerHashAddress,
-            data.sellerCashLedgerHashAddress,
-            data.sellerGpsLocation,
-            data.sellerVatNumber,
-            data.transactionVat,
-            invoiceHash, {
-               gas: 2000000,
-               from: web3.eth.accounts[0],
-            }, (err, result) => {
+         // Initiate the sign request
+         httpPost('http://esign.comprarymirar.com/first-step', postBody, response => {
+            response = JSON.parse(response)
 
-            cb()
+            l(response)
+
+            // Update the invoice instance data
+            this.state.ContractInstance.completeSellerInvoiceData(
+               this.state.TransactionInstance.address,
+               data.sellerAssetsLedgerHashAddress,
+               data.sellerCashLedgerHashAddress,
+               data.sellerGpsLocation,
+               data.sellerVatNumber,
+               data.transactionVat,
+               invoiceHash,
+               response.envelopeId, {
+                  gas: 2000000,
+                  from: web3.eth.accounts[0],
+               }, (err, result) => {
+
+               let secondStepBody = {
+                  clientUserId: 1001,
+                  email: combinedData.sellerEmail,
+                  recipientId: 1,
+                  returnUrl: 'http://localhost:8080/return-url',
+                  userName: combinedData.sellerName,
+                  envelopeId: response.envelopeId,
+               }
+
+               // Get the seller sign url & redirect him
+               httpPost('http://esign.comprarymirar.com/second-step', secondStepBody, response => {
+                  console.log(response)
+
+                  let signUrl = JSON.parse(response).url;
+
+                  window.location = signUrl
+               })
+            })
          })
       }
 
-      // 3
-      const signIPFSInvoice = () => {
-
-      }
-
-      // Update the IPFS invoice
-      updateIPFSInvoice(newInvoiceHash => {
-
-         // Complete the contract data with the seller information
-         updateInvoiceInstance(newInvoiceHash, done => {
-            signIPFSInvoice()
-         })
+      updateIPFSInvoice(invoiceHash => {
+         signIPFSInvoice(invoiceHash)
       })
 
-      // TODO Sign it
-      // Sign the IPFS invoice
-      // GET the ether from the transaction when both sign
+      // TODO GET the ether from the transaction when both sign
    }
 
    render(){
@@ -387,4 +409,15 @@ window.addEventListener('load', () => {
 // Helper function to make console.logs faster
 function l(m){
    console.log(m)
+}
+
+// Helper function to make Ajax calls
+function httpPost(url, bodyObject, cb){
+   const xhr = new XMLHttpRequest()
+   xhr.open('POST', url)
+   xhr.setRequestHeader('Content-Type', 'application/json')
+   xhr.addEventListener('readystatechange', () => {
+      if(xhr.readyState === XMLHttpRequest.DONE) cb(xhr.responseText)
+   })
+   xhr.send(JSON.stringify(bodyObject));
 }

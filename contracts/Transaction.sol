@@ -21,12 +21,13 @@ contract Transaction {
    uint buyerVatNumber;
 
    bytes invoiceHashAddress;
+   bytes envelopeId;
 
    uint timestamp;
    uint quantityBought;
    uint amountPaidWei;
    uint pricePerItem;
-   uint vat; // Not set on the constructor
+   uint vat; // Not set on the constructor, set by the seller
 
    modifier onlyOwner(){
         if(msg.sender == owner)
@@ -62,16 +63,26 @@ contract Transaction {
     }
 
     function getInitialData() constant returns(
-        bytes32, address, bytes32, address, bytes32, bytes32, bytes32, uint, uint, uint, uint){
+        bytes32, address, bytes32, address, bytes32, bytes32, bytes32, uint, uint, uint, uint
+    ){
         return(
             buyerName, sellerAddress, buyerEmail, buyerAddress, buyerGpsLocation,
             sellerName, sellerEmail, buyerVatNumber, quantityBought, pricePerItem, amountPaidWei
         );
     }
 
+    function getMissingSellerData() constant returns(
+        bytes32, bytes, bytes, uint, bytes, bytes, uint, uint, uint, uint
+    ){
+        return(sellerGpsLocation, sellerCashLedgerAddress, sellerAssetsLedgerAddress,
+        sellerVatNumber, invoiceHashAddress, envelopeId, quantityBought, amountPaidWei,
+        pricePerItem, vat);
+    }
+
     function completeSellerInvoiceData(
         bytes sellerAssetsLedgerHashAddress, bytes sellerCashLedgerHashAddress,
-        bytes32 _sellerGpsLocation, uint _sellerVatNumber, uint transactionVat, bytes finalInvoiceHash
+        bytes32 _sellerGpsLocation, uint _sellerVatNumber, uint transactionVat, bytes finalInvoiceHash,
+        bytes _envelopeId
     ){
         sellerAssetsLedgerAddress = sellerAssetsLedgerHashAddress;
         sellerCashLedgerAddress = sellerCashLedgerHashAddress;
@@ -79,6 +90,7 @@ contract Transaction {
         sellerVatNumber = _sellerVatNumber;
         vat = transactionVat;
         invoiceHashAddress = finalInvoiceHash;
+        envelopeId = _envelopeId;
    }
 
     function getHashAddresses() constant returns(bytes, bytes, bytes){

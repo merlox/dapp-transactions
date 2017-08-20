@@ -40,15 +40,17 @@ contract TransactionsManager{
 
    function completeSellerInvoiceData(
         address instanceAddress, bytes sellerAssetsLedgerHashAddress, bytes sellerCashLedgerHashAddress,
-        bytes32 sellerGpsLocation, uint sellerVatNumber, uint transactionVat, bytes invoiceHash
+        bytes32 sellerGpsLocation, uint sellerVatNumber, uint transactionVat, bytes invoiceHash, bytes envelopeId
     ){
         Transaction t = Transaction(instanceAddress);
 
         t.completeSellerInvoiceData(sellerAssetsLedgerHashAddress, sellerCashLedgerHashAddress,
-        sellerGpsLocation, sellerVatNumber, transactionVat, invoiceHash);
+        sellerGpsLocation, sellerVatNumber, transactionVat, invoiceHash, envelopeId);
 
         for(uint i = 0; i < pendingTransactionInstancesSellerAddress.length; i++){
-            if(pendingTransactionInstancesSellerAddress[i] == instanceAddress){
+
+            // msg.sender is the seller address that called this function
+            if(pendingTransactionInstancesSellerAddress[i] == msg.sender){
                 waitingCounterSignInstancesSellerAddress.push(pendingTransactionInstancesSellerAddress[i]);
                 pendingTransactionInstancesSellerAddress[i] = address(0);
                 break;
@@ -63,6 +65,18 @@ contract TransactionsManager{
    // Get the seller addresses, check if the current user's address is in there
     function getPendingTransactionsSellerAddresses() constant returns(address[]){
        return pendingTransactionInstancesSellerAddress;
+   }
+
+   function getWaitingCounterSignInstancesSellerAddress() constant returns(address[]){
+       return waitingCounterSignInstancesSellerAddress;
+   }
+
+   function getCompletedTransactionInstances() constant returns(address[]){
+       return completedTransactionInstances;
+   }
+
+   function getCancelledTransactionInstances() constant returns(address[]){
+       return cancelledTransactionInstances;
    }
 
    // Given the seller address, get his instance smart contract address

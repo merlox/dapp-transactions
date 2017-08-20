@@ -117,6 +117,9 @@ class SellerForm extends React.Component {
                   </label>
 
                   <input type="submit" value="Submit form and confirm transaction" />
+                  <p>After submiting the form you'll have to pay for the gas of saving the transaction data on the blockchain,
+                  then you'll be redirected to eSign the invoice. You'll get the Ether from the transaction when both sign.
+                  An email will be sent to the buyer to counter-sign the invoice.</p>
                </form>
             </div>
          )
