@@ -174,6 +174,28 @@ class App extends React.Component {
       })
    }
 
+   getWaitingTransactionAddress(cb){
+      const userAddresses = web3.eth.accounts
+
+      this.state.ContractInstance.getWaitingCounterSignInstancesBuyerAddress((err, waitingTransactionsAddresses) => {
+         for(let i = 0; i < userAddresses.length; i++){
+            for(let j = 0; j < waitingTransactionsAddresses.length; j++){
+               let waitingTransactionAddress = waitingTransactionsAddresses[j]
+
+               if(userAddresses[i] === waitingTransactionAddress){
+
+                  // Get the instance address given the seller address
+                  this.state.ContractInstance.getBuyerInstanceAddress(waitingTransactionAddress, (err, instanceAddress) => {
+                     return cb(instanceAddress)
+                  })
+               }
+            }
+         }
+
+         return cb(null)
+      })
+   }
+
    checkPendingTransactions(){
       this.getFirstPendingTransactionAddress(sellerInstanceAddress => {
          if(sellerInstanceAddress !== null){
@@ -186,6 +208,20 @@ class App extends React.Component {
                   this.state.TransactionInstance.getHashAddresses((err, hashAddresses) => {
                      this.createNotificationSeller(initialData, hashAddresses)
                   })
+               })
+            })
+         }else{
+            this.getWaitingTransactionAddress(instanceAddress => {
+
+               // Generate the Transaction contract instance and get his data
+               this.setState({
+                  TransactionInstance: web3.eth.contract(temporaryContract.abiTransaction).at(instanceAddress)
+               }, () => {
+                  // this.state.TransactionInstance.getInitialData((err, initialData) => {
+                  //    this.state.TransactionInstance.getHashAddresses((err, hashAddresses) => {
+                  //       this.createNotificationSeller(initialData, hashAddresses)
+                  //    })
+                  // })
                })
             })
          }
@@ -220,12 +256,14 @@ class App extends React.Component {
    // Kills the contract
    declineSellerTransaction(){
       const instanceAddress = this.state.TransactionInstance.address
-      l(instanceAddress)
-      this.getFirstPendingTransactionAddress(instanceAddress => {
-         this.state.ContractInstance.killInstance(instanceAddress, web3.eth.accounts[0], (err, result) => {
 
-            l('Deleted contract, here is the transaction address')
-            l(result)
+      this.state.TransactionInstance.buyerAddress((err, buyerAddress) => {
+         this.getFirstPendingTransactionAddress(instanceAddress => {
+            this.state.ContractInstance.killInstance(instanceAddress, web3.eth.accounts[0], buyerAddress, (err, result) => {
+
+               l('Deleted contract, here is the transaction address')
+               l(result)
+            })
          })
       })
    }
@@ -309,8 +347,32 @@ class App extends React.Component {
 
       // 2
       const signIPFSInvoice = invoiceHash => {
+
+         let documentInvoice = `
+            Amount paid in ether: ${combinedData.amountPayEther}
+            Price per item: ${combinedData.pricePerItem}
+            Quantity bought: ${combinedData.quantityBought}
+            Transaction VAT: ${combinedData.transactionVat}
+            ---
+            Buyer name: ${combinedData.buyerName}
+            Buyer email: ${combinedData.buyerEmail}
+            Buyer address: ${combinedData.buyerAddress}
+            Buyer cash ledger hash address: ${combinedData.buyerCashLedgerHashAddress}
+            Buyer assets ledger hash address: ${combinedData.buyerAssetsLedgerHashAddress}
+            Buyer GPS location: ${combinedData.buyerGPSLocation}
+            Buyer VAT number: ${combinedData.buyerVatNumber}
+            ---
+            Seller Name: ${combinedData.sellerName}
+            Seller email: ${combinedData.sellerEmail}
+            Seller addres: ${combinedData.sellerAddress}
+            Seller cash ledger hash address: ${combinedData.sellerCashLedgerHashAddress}
+            Seller assets ledger hash address: ${combinedData.sellerAssetsLedgerHashAddress}
+            Seller GPS location: ${combinedData.sellerGpsLocation}
+            Seller VAT number: ${combinedData.sellerVatNumber}
+         `
+
          const postBody = {
-            fileContent: btoa(combinedData), // Convert data to base64
+            fileContent: btoa(documentInvoice), // Convert data to base64
             firstEmail: combinedData.sellerEmail,
             firstName: combinedData.sellerName,
             secondEmail: combinedData.buyerEmail,
@@ -326,6 +388,7 @@ class App extends React.Component {
             // Update the invoice instance data
             this.state.ContractInstance.completeSellerInvoiceData(
                this.state.TransactionInstance.address,
+               combinedData.buyerAddress,
                data.sellerAssetsLedgerHashAddress,
                data.sellerCashLedgerHashAddress,
                data.sellerGpsLocation,
@@ -341,15 +404,13 @@ class App extends React.Component {
                   clientUserId: 1001,
                   email: combinedData.sellerEmail,
                   recipientId: 1,
-                  returnUrl: 'http://localhost:8080/return-url',
+                  returnUrl: signReturnUrl,
                   userName: combinedData.sellerName,
                   envelopeId: response.envelopeId,
                }
 
                // Get the seller sign url & redirect him
                httpPost('http://esign.comprarymirar.com/second-step', secondStepBody, response => {
-                  console.log(response)
-
                   let signUrl = JSON.parse(response).url;
 
                   window.location = signUrl
@@ -404,7 +465,6 @@ window.addEventListener('load', () => {
       document.querySelector('#root')
    )
 })
-
 
 // Helper function to make console.logs faster
 function l(m){
