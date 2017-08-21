@@ -5,12 +5,13 @@ import "./Transaction.sol";
 /* The manager will generate instances of the Transactions like a database */
 contract TransactionsManager{
    address[] pendingTransactionInstancesSellerAddress;
-   address[] waitingCounterSignInstancesSellerAddress;
+   address[] waitingCounterSignInstancesBuyerAddress;
    address[] completedTransactionInstances;
    address[] cancelledTransactionInstances;
    address owner = msg.sender;
 
    mapping(address => address) sellerAddressInstance;
+   mapping(address => address) buyerAddressInstance;
    mapping(address => bytes) sellerInvoiceHash;
 
     modifier onlyOwner(){
@@ -20,8 +21,8 @@ contract TransactionsManager{
 
     function() payable {}
 
-    function extractEther() onlyOwner {
-        msg.sender.transfer(address(this).balance);
+    function getBalance() constant returns(uint){
+        return this.balance;
     }
 
     function generateInstance(address[2] buyerSellerAddress, bytes invoiceHashAddress,
@@ -36,13 +37,19 @@ contract TransactionsManager{
         sellerInvoiceHash[buyerSellerAddress[1]] = invoiceHashAddress;
         pendingTransactionInstancesSellerAddress.push(buyerSellerAddress[1]);
         sellerAddressInstance[buyerSellerAddress[1]] = t;
+        buyerAddressInstance[buyerSellerAddress[0]] = t;
     }
 
    function completeSellerInvoiceData(
-        address instanceAddress, bytes sellerAssetsLedgerHashAddress, bytes sellerCashLedgerHashAddress,
+        address instanceAddress, address buyerAddress, uint amountPaidWei, bytes sellerAssetsLedgerHashAddress, bytes sellerCashLedgerHashAddress,
         bytes32 sellerGpsLocation, uint sellerVatNumber, uint transactionVat, bytes invoiceHash, bytes envelopeId
     ){
         Transaction t = Transaction(instanceAddress);
+
+        address sellerAddress = address(t.sellerAddress);
+
+        // Transfer the ether to the seller
+        sellerAddress.transfer(amountPaidWei);
 
         t.completeSellerInvoiceData(sellerAssetsLedgerHashAddress, sellerCashLedgerHashAddress,
         sellerGpsLocation, sellerVatNumber, transactionVat, invoiceHash, envelopeId);
@@ -51,7 +58,7 @@ contract TransactionsManager{
 
             // msg.sender is the seller address that called this function
             if(pendingTransactionInstancesSellerAddress[i] == msg.sender){
-                waitingCounterSignInstancesSellerAddress.push(pendingTransactionInstancesSellerAddress[i]);
+                waitingCounterSignInstancesBuyerAddress.push(buyerAddress);
                 pendingTransactionInstancesSellerAddress[i] = address(0);
                 break;
             }
@@ -67,8 +74,8 @@ contract TransactionsManager{
        return pendingTransactionInstancesSellerAddress;
    }
 
-   function getWaitingCounterSignInstancesSellerAddress() constant returns(address[]){
-       return waitingCounterSignInstancesSellerAddress;
+   function getWaitingCounterSignInstancesBuyerAddress() constant returns(address[]){
+       return waitingCounterSignInstancesBuyerAddress;
    }
 
    function getCompletedTransactionInstances() constant returns(address[]){
@@ -84,14 +91,19 @@ contract TransactionsManager{
        return sellerAddressInstance[sellerAddress];
    }
 
+   function getBuyerInstanceAddress(address buyerAddress) constant returns(address){
+       return buyerAddressInstance[buyerAddress];
+   }
+
    function getCompletedTransactions() constant returns(address[]){
        return completedTransactionInstances;
    }
 
-   function killInstance(address instanceAddress, address instanceSellerAddress){
+   function killInstance(address instanceAddress, address instanceSellerAddress, address buyerAddress){
        Transaction t = Transaction(instanceAddress);
 
        sellerAddressInstance[instanceSellerAddress] = 0;
+       buyerAddressInstance[buyerAddress] = 0;
 
        for(uint a = 0; a < pendingTransactionInstancesSellerAddress.length; a++){
            if(pendingTransactionInstancesSellerAddress[a] == instanceSellerAddress){

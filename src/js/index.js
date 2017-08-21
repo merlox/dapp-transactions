@@ -7,7 +7,7 @@ import BuyerForm from './BuyerForm.js'
 import SellerForm from './SellerForm.js'
 import temporaryContract from './../temporaryContract.json'
 
-const signReturnUrl = 'http://localhost:8080/return-url'
+const signReturnUrl = 'http://localhost:8080/'
 
 class App extends React.Component {
    constructor(props){
@@ -19,6 +19,7 @@ class App extends React.Component {
          displayBuyerForm: true,
          displayAreYouSure: false,
          displaySellerForm: false,
+         displayBuyerNotification: false,
       }
    }
 
@@ -211,25 +212,39 @@ class App extends React.Component {
                })
             })
          }else{
-            this.getWaitingTransactionAddress(instanceAddress => {
-
-               // Generate the Transaction contract instance and get his data
-               this.setState({
-                  TransactionInstance: web3.eth.contract(temporaryContract.abiTransaction).at(instanceAddress)
-               }, () => {
-                  // this.state.TransactionInstance.getInitialData((err, initialData) => {
-                  //    this.state.TransactionInstance.getHashAddresses((err, hashAddresses) => {
-                  //       this.createNotificationSeller(initialData, hashAddresses)
-                  //    })
-                  // })
-               })
-            })
+            // this.getWaitingTransactionAddress(instanceAddress => {
+            //
+            //    // Generate the Transaction contract instance and get his data
+            //    this.setState({
+            //       TransactionInstance: web3.eth.contract(temporaryContract.abiTransaction).at(instanceAddress)
+            //    }, () => {
+            //
+            //       this.state.TransactionInstance.getInitialData((err, initialData) => {
+            //          this.state.TransactionInstance.getHashAddresses((err, hashAddresses) => {
+            //             this.state.TransactionInstance.getMissingSellerData((err, sellerData) => {
+            //                this.createNotificationSeller(initialData, hashAddresses, sellerData)
+            //             })
+            //          })
+            //       })
+            //    })
+            // })
          }
       })
    }
 
    // If found a pending initiated transaction, execute this
-   createNotificationSeller(initialData, hashAddresses){
+   createNotificationSeller(initialData, hashAddresses, sellerData){
+
+      l(web3.toUtf8(initialData[0]))
+      l(web3.toUtf8(initialData[2]))
+      l(web3.toUtf8(hashAddresses[0]))
+      l(web3.toUtf8(hashAddresses[1]))
+      l(web3.toAscii(hashAddresses[2]))
+      l(web3.toAscii(initialData[4]))
+      l(web3.toUtf8(initialData[5]))
+      l(web3.toUtf8(initialData[6]))
+      l(web3.fromWei(parseInt(initialData[9]), 'ether'))
+      l(web3.fromWei(initialData[10], 'ether'))
 
       let newData = {
          displayBuyerForm: false,
@@ -247,7 +262,21 @@ class App extends React.Component {
          sellerEmail: web3.toUtf8(initialData[6]),
          quantityBought: parseInt(initialData[8]),
          pricePerItem: web3.fromWei(parseInt(initialData[9]), 'ether'),
-         amountPayEther: web3.fromWei(parseInt(initialData[10]), 'ether'),
+         amountPayEther: web3.fromWei(initialData[10], 'ether'),
+      }
+
+      if(sellerData != undefined){
+         newData = {
+            ...newData,
+            displayBuyerNotification: true,
+            sellerGpsLocation: web3.toUtf8(sellerData[0]),
+            sellerCashLedgerAddress: web3.toUtf8(sellerData[1]),
+            sellerAssetsLedgerAddress: web3.toUtf8(sellerData[2]),
+            sellerVatNumber: parseInt(sellerData[3]),
+            invoiceHashAddress: web3.toUtf8(hashAddresses[4]),
+            envelopeId: web3.toUtf8(sellerData[5]),
+            vat: parseInt(sellerData[9]),
+         }
       }
 
       this.setState(newData)
@@ -270,7 +299,6 @@ class App extends React.Component {
 
    submitSellerForm(data, newCashLedgerAmount, newAssetsLedgerAmount){
 
-      l(data)
       let combinedData
 
       // 1
@@ -383,12 +411,11 @@ class App extends React.Component {
          httpPost('http://esign.comprarymirar.com/first-step', postBody, response => {
             response = JSON.parse(response)
 
-            l(response)
-
             // Update the invoice instance data
             this.state.ContractInstance.completeSellerInvoiceData(
                this.state.TransactionInstance.address,
                combinedData.buyerAddress,
+               combinedData.amountPayEther,
                data.sellerAssetsLedgerHashAddress,
                data.sellerCashLedgerHashAddress,
                data.sellerGpsLocation,

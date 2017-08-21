@@ -4,30 +4,30 @@ contract Transaction {
 
     address owner = msg.sender;
 
-   bytes32 sellerName;
-   address sellerAddress;
-   bytes32 sellerEmail;
-   bytes32 sellerGpsLocation;
-   bytes sellerCashLedgerAddress;
-   bytes sellerAssetsLedgerAddress;
-   uint sellerVatNumber;
+   bytes32 public sellerName;
+   address public sellerAddress;
+   bytes32 public sellerEmail;
+   bytes32 public sellerGpsLocation;
+   bytes public sellerCashLedgerAddress;
+   bytes public sellerAssetsLedgerAddress;
+   uint public sellerVatNumber;
 
-   address buyerAddress;
-   bytes32 buyerName;
-   bytes32 buyerEmail;
-   bytes32 buyerGpsLocation;
-   bytes buyerCashLedgerAddress;
-   bytes buyerAssetsLedgerAddress;
-   uint buyerVatNumber;
+   address public buyerAddress;
+   bytes32 public buyerName;
+   bytes32 public buyerEmail;
+   bytes32 public buyerGpsLocation;
+   bytes public buyerCashLedgerAddress;
+   bytes public buyerAssetsLedgerAddress;
+   uint public buyerVatNumber;
 
-   bytes invoiceHashAddress;
-   bytes envelopeId;
+   bytes public invoiceHashAddress;
+   bytes public envelopeId;
 
-   uint timestamp;
-   uint quantityBought;
-   uint amountPaidWei;
-   uint pricePerItem;
-   uint vat; // Not set on the constructor, set by the seller
+   uint public timestamp;
+   uint public quantityBought;
+   uint public amountPaidWei;
+   uint public pricePerItem;
+   uint public vat; // Not set on the constructor, set by the seller
 
    modifier onlyOwner(){
         if(msg.sender == owner)
