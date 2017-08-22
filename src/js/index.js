@@ -1,11 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import Web3 from 'web3'
-import './../css/index.css'
 import IPFS from 'ipfs'
 import BuyerForm from './BuyerForm.js'
 import SellerForm from './SellerForm.js'
 import temporaryContract from './../temporaryContract.json'
+import './../css/index.css'
 
 const signReturnUrl = 'http://localhost:8080/'
 
@@ -19,7 +19,6 @@ class App extends React.Component {
          displayBuyerForm: true,
          displayAreYouSure: false,
          displaySellerForm: false,
-         displayBuyerNotification: false,
       }
    }
 
@@ -35,8 +34,6 @@ class App extends React.Component {
 
    initState(cb){
       if(typeof web3 != 'undefined'){
-         l("Using web3 detected from external source like Metamask")
-
          window.web3 = new Web3(web3.currentProvider)
          window.ipfs = new IPFS()
 
@@ -45,6 +42,7 @@ class App extends React.Component {
          }, () => {
             ipfs.on('ready', () => {
                l("IPFS node is ready")
+
                cb()
             })
          })
@@ -64,10 +62,14 @@ class App extends React.Component {
             ).then(results => {
                data.buyerCashLedgerHashAddress = results[0].hash
 
+               this.setState({ buyerCashLedgerHashAddress: results[0].hash })
+
                ipfs.files.add(
                   new ipfs.types.Buffer(newAssetsLedgerAmount)
                ).then(results => {
                   data.buyerAssetsLedgerHashAddress = results[0].hash
+
+                  this.setState({ buyerAssetsLedgerHashAddress: results[0].hash })
 
                   cb()
                })
@@ -78,6 +80,8 @@ class App extends React.Component {
             ).then(results => {
                data.buyerCashLedgerHashAddress = results[0].hash
 
+               this.setState({ buyerCashLedgerHashAddress: results[0].hash })
+
                cb()
             })
          }else if(data.buyerAssetsLedgerHashAddress.length <= 0){
@@ -85,6 +89,8 @@ class App extends React.Component {
                new ipfs.types.Buffer(newAssetsLedgerAmount)
             ).then(results => {
                data.buyerAssetsLedgerHashAddress = results[0].hash
+
+               this.setState({ buyerAssetsLedgerHashAddress: results[0].hash })
 
                cb()
             })
@@ -94,9 +100,6 @@ class App extends React.Component {
       // First generate an invoice document Then create the smart contract instance with the invoice hash
       const generateIpfsInvoice = () => {
          let invoice = JSON.stringify(data)
-
-         l('Adding invoice to IPFS')
-         l(invoice)
 
          ipfs.files.add(
             new ipfs.types.Buffer(invoice)
@@ -116,6 +119,8 @@ class App extends React.Component {
                parseInt(data.buyerVatNumber), parseInt(data.quantityBought), web3.toWei(data.pricePerItem, 'ether')
             ]
             invoiceHashAddress = invoiceHashAddress[0].hash
+
+            this.setState({ invoiceHashAddress: invoiceHashAddress })
 
             // Generate the smart contract instance and save the hash address of the invoice
             this.state.ContractInstance.generateInstance(
@@ -175,28 +180,6 @@ class App extends React.Component {
       })
    }
 
-   getWaitingTransactionAddress(cb){
-      const userAddresses = web3.eth.accounts
-
-      this.state.ContractInstance.getWaitingCounterSignInstancesBuyerAddress((err, waitingTransactionsAddresses) => {
-         for(let i = 0; i < userAddresses.length; i++){
-            for(let j = 0; j < waitingTransactionsAddresses.length; j++){
-               let waitingTransactionAddress = waitingTransactionsAddresses[j]
-
-               if(userAddresses[i] === waitingTransactionAddress){
-
-                  // Get the instance address given the seller address
-                  this.state.ContractInstance.getBuyerInstanceAddress(waitingTransactionAddress, (err, instanceAddress) => {
-                     return cb(instanceAddress)
-                  })
-               }
-            }
-         }
-
-         return cb(null)
-      })
-   }
-
    checkPendingTransactions(){
       this.getFirstPendingTransactionAddress(sellerInstanceAddress => {
          if(sellerInstanceAddress !== null){
@@ -211,40 +194,12 @@ class App extends React.Component {
                   })
                })
             })
-         }else{
-            // this.getWaitingTransactionAddress(instanceAddress => {
-            //
-            //    // Generate the Transaction contract instance and get his data
-            //    this.setState({
-            //       TransactionInstance: web3.eth.contract(temporaryContract.abiTransaction).at(instanceAddress)
-            //    }, () => {
-            //
-            //       this.state.TransactionInstance.getInitialData((err, initialData) => {
-            //          this.state.TransactionInstance.getHashAddresses((err, hashAddresses) => {
-            //             this.state.TransactionInstance.getMissingSellerData((err, sellerData) => {
-            //                this.createNotificationSeller(initialData, hashAddresses, sellerData)
-            //             })
-            //          })
-            //       })
-            //    })
-            // })
          }
       })
    }
 
    // If found a pending initiated transaction, execute this
    createNotificationSeller(initialData, hashAddresses, sellerData){
-
-      l(web3.toUtf8(initialData[0]))
-      l(web3.toUtf8(initialData[2]))
-      l(web3.toUtf8(hashAddresses[0]))
-      l(web3.toUtf8(hashAddresses[1]))
-      l(web3.toAscii(hashAddresses[2]))
-      l(web3.toAscii(initialData[4]))
-      l(web3.toUtf8(initialData[5]))
-      l(web3.toUtf8(initialData[6]))
-      l(web3.fromWei(parseInt(initialData[9]), 'ether'))
-      l(web3.fromWei(initialData[10], 'ether'))
 
       let newData = {
          displayBuyerForm: false,
@@ -262,21 +217,7 @@ class App extends React.Component {
          sellerEmail: web3.toUtf8(initialData[6]),
          quantityBought: parseInt(initialData[8]),
          pricePerItem: web3.fromWei(parseInt(initialData[9]), 'ether'),
-         amountPayEther: web3.fromWei(initialData[10], 'ether'),
-      }
-
-      if(sellerData != undefined){
-         newData = {
-            ...newData,
-            displayBuyerNotification: true,
-            sellerGpsLocation: web3.toUtf8(sellerData[0]),
-            sellerCashLedgerAddress: web3.toUtf8(sellerData[1]),
-            sellerAssetsLedgerAddress: web3.toUtf8(sellerData[2]),
-            sellerVatNumber: parseInt(sellerData[3]),
-            invoiceHashAddress: web3.toUtf8(hashAddresses[4]),
-            envelopeId: web3.toUtf8(sellerData[5]),
-            vat: parseInt(sellerData[9]),
-         }
+         amountPayEther: web3.fromWei(parseFloat(initialData[10]), 'ether'),
       }
 
       this.setState(newData)
@@ -290,8 +231,7 @@ class App extends React.Component {
          this.getFirstPendingTransactionAddress(instanceAddress => {
             this.state.ContractInstance.killInstance(instanceAddress, web3.eth.accounts[0], buyerAddress, (err, result) => {
 
-               l('Deleted contract, here is the transaction address')
-               l(result)
+               // Deleted contract, here is the transaction address: result
             })
          })
       })
@@ -352,9 +292,6 @@ class App extends React.Component {
                      let invoiceData = JSON.parse(fileContent)
                      combinedData = {...invoiceData, ...data}
 
-                     l('Combined data')
-                     l(combinedData)
-
                      ipfs.files.add(
                         new ipfs.types.Buffer(JSON.stringify(combinedData))
                      ).then(invoiceHashAddress => {
@@ -414,8 +351,9 @@ class App extends React.Component {
             // Update the invoice instance data
             this.state.ContractInstance.completeSellerInvoiceData(
                this.state.TransactionInstance.address,
+               combinedData.sellerAddress,
                combinedData.buyerAddress,
-               combinedData.amountPayEther,
+               web3.toWei(combinedData.amountPayEther, 'ether'),
                data.sellerAssetsLedgerHashAddress,
                data.sellerCashLedgerHashAddress,
                data.sellerGpsLocation,
@@ -449,14 +387,17 @@ class App extends React.Component {
       updateIPFSInvoice(invoiceHash => {
          signIPFSInvoice(invoiceHash)
       })
-
-      // TODO GET the ether from the transaction when both sign
    }
 
    render(){
       if(this.state.displayBuyerForm){
          return (
             <div className="main-container">
+               <div className="notification" style={{display: this.state.invoiceHashAddress ? 'block' : 'none'}}>
+                  <p>Your cash ledger address is: {this.state.buyerCashLedgerHashAddress}</p>
+                  <p>Your assets ledger address is: {this.state.buyerAssetsLedgerHashAddress}</p>
+                  <p>Your invoice hash address is: {this.state.invoiceHashAddress}</p>
+               </div>
                <BuyerForm
                   {...this.state}
                   submitBuyerForm={(data, newCashLedgerAmount, newAssetsLedgerAmount) => {
