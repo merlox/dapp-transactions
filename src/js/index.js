@@ -1,17 +1,25 @@
+import Web3 from 'web3'
 import React from 'react'
 import ReactDOM from 'react-dom'
-import Web3 from 'web3'
-import IPFS from 'ipfs'
+import {BrowserRouter, Route, Switch} from 'react-router-dom'
+import PropTypes from 'prop-types'
 import BuyerForm from './BuyerForm.js'
 import SellerForm from './SellerForm.js'
+import HomePage from './HomePage'
+import IPFS from 'ipfs'
 import temporaryContract from './../temporaryContract.json'
-import './../css/index.css'
+import './../stylus/index.styl'
 
 const signReturnUrl = 'http://localhost:8080/'
 
-class App extends React.Component {
-   constructor(props){
-      super(props)
+
+class Main extends React.Component {
+   static contextTypes = {
+      router: PropTypes.object
+   }
+
+   constructor(props, context){
+      super(props, context)
 
       this.state = {
          ipfs: null,
@@ -33,7 +41,7 @@ class App extends React.Component {
    }
 
    initState(cb){
-      if(typeof web3 != 'undefined'){
+      if(typeof web3 != undefined){
          window.web3 = new Web3(web3.currentProvider)
          window.ipfs = new IPFS()
 
@@ -202,7 +210,6 @@ class App extends React.Component {
    createNotificationSeller(initialData, hashAddresses, sellerData){
 
       let newData = {
-         displayBuyerForm: false,
          displaySellerForm: false,
          buyerName: web3.toUtf8(initialData[0]),
          buyerAddress: initialData[3],
@@ -220,7 +227,9 @@ class App extends React.Component {
          amountPayEther: web3.fromWei(parseFloat(initialData[10]), 'ether'),
       }
 
-      this.setState(newData)
+      this.setState(newData, () => {
+         this.context.router.history.push('/seller')
+      })
    }
 
    // Kills the contract
@@ -290,7 +299,11 @@ class App extends React.Component {
                   stream.on('data', file => {
                      let fileContent = new TextDecoder('utf-8').decode(file)
                      let invoiceData = JSON.parse(fileContent)
-                     combinedData = {...invoiceData, ...data}
+                     combinedData = {
+                        ...invoiceData,
+                        ...data,
+                        invoiceInstanceAddress: this.state.TransactionInstance.address
+                     }
 
                      ipfs.files.add(
                         new ipfs.types.Buffer(JSON.stringify(combinedData))
@@ -334,6 +347,8 @@ class App extends React.Component {
             Seller assets ledger hash address: ${combinedData.sellerAssetsLedgerHashAddress}
             Seller GPS location: ${combinedData.sellerGpsLocation}
             Seller VAT number: ${combinedData.sellerVatNumber}
+            ---
+            IPFS invoice instance address: ${this.state.TransactionInstance.address}
          `
 
          const postBody = {
@@ -348,17 +363,31 @@ class App extends React.Component {
          httpPost('http://esign.comprarymirar.com/first-step', postBody, response => {
             response = JSON.parse(response)
 
+            // Update the 4 ledgers
+            updateLedgerAmount(combinedData.sellerCashLedgerHashAddress, +combinedData.amountPayEther, hash => {
+               combinedData.sellerCashLedgerHashAddress = hash
+            })
+            updateLedgerAmount(combinedData.sellerAssetsLedgerHashAddress, -combinedData.quantityBought, hash => {
+               combinedData.sellerAssetsLedgerHashAddress = hash
+            })
+            updateLedgerAmount(combinedData.buyerCashLedgerHashAddress, -combinedData.amountPayEther, hash => {
+               combinedData.buyerCashLedgerHashAddress = hash
+            })
+            updateLedgerAmount(combinedData.buyerAssetsLedgerHashAddress, +combinedData.quantityBought, hash => {
+               combinedData.buyerAssetsLedgerHashAddress = hash
+            })
+
             // Update the invoice instance data
             this.state.ContractInstance.completeSellerInvoiceData(
                this.state.TransactionInstance.address,
                combinedData.sellerAddress,
                combinedData.buyerAddress,
                web3.toWei(combinedData.amountPayEther, 'ether'),
-               data.sellerAssetsLedgerHashAddress,
-               data.sellerCashLedgerHashAddress,
-               data.sellerGpsLocation,
-               data.sellerVatNumber,
-               data.transactionVat,
+               combinedData.sellerAssetsLedgerHashAddress,
+               combinedData.sellerCashLedgerHashAddress,
+               combinedData.sellerGpsLocation,
+               combinedDatacombinedData.sellerVatNumber,
+               combinedData.transactionVat,
                invoiceHash,
                response.envelopeId, {
                   gas: 2000000,
@@ -384,20 +413,43 @@ class App extends React.Component {
          })
       }
 
+      const updateLedgerAmount = (ledgerHash, amount, cb) => {
+         ipfs.files.cat(ledgerHash, (err, stream) => {
+            stream.on('data', file => {
+               let fileContent = parseFloat(new TextDecoder('utf-8').decode(file))
+
+               fileContent += amount
+
+               ipfs.files.add(
+                  new ipfs.types.Buffer(JSON.stringify(fileContent))
+               ).then(invoiceHashAddress => {
+
+                  cb(invoiceHashAddress[0].hash)
+               })
+             })
+         })
+      }
+
       updateIPFSInvoice(invoiceHash => {
          signIPFSInvoice(invoiceHash)
       })
    }
 
    render(){
-      if(this.state.displayBuyerForm){
-         return (
-            <div className="main-container">
-               <div className="notification" style={{display: this.state.invoiceHashAddress ? 'block' : 'none'}}>
-                  <p>Your cash ledger address is: {this.state.buyerCashLedgerHashAddress}</p>
-                  <p>Your assets ledger address is: {this.state.buyerAssetsLedgerHashAddress}</p>
-                  <p>Your invoice hash address is: {this.state.invoiceHashAddress}</p>
-               </div>
+      return (
+         <Switch>
+            <Route exact path="/" component={HomePage} />
+            <Route path="/seller" render={() => (
+               <SellerForm
+                  {...this.state}
+                  handleState={stateObject => this.setState(stateObject)}
+                  declineTransaction={() => this.declineSellerTransaction()}
+                  submitSellerForm={(data, newCashLedgerAmount, newAssetsLedgerAmount) => {
+                     this.submitSellerForm(data, newCashLedgerAmount, newAssetsLedgerAmount)
+                  }}
+               />
+            )} />
+            <Route path="/buyer" render={() => (
                <BuyerForm
                   {...this.state}
                   submitBuyerForm={(data, newCashLedgerAmount, newAssetsLedgerAmount) => {
@@ -405,34 +457,18 @@ class App extends React.Component {
                   }}
                   handleState={stateObject => this.setState(stateObject)}
                />
-            </div>
-         )
-      }else{
-         return (
-            <div className="main-container">
-               <SellerForm {...this.state}
-                  handleState={stateObject => this.setState(stateObject)}
-                  declineTransaction={() => this.declineSellerTransaction()}
-                  submitSellerForm={(data, newCashLedgerAmount, newAssetsLedgerAmount) => {
-                     this.submitSellerForm(data, newCashLedgerAmount, newAssetsLedgerAmount)
-                  }}
-               />
-            </div>
-         )
-      }
+            )} />
+         </Switch>
+      )
    }
 }
 
-window.addEventListener('load', () => {
-   let div = document.createElement('div')
-   div.id = 'root'
-   document.body.appendChild(div)
-
-   ReactDOM.render(
-      <App />,
-      document.querySelector('#root')
-   )
-})
+ReactDOM.render(
+   <BrowserRouter>
+      <Main />
+   </BrowserRouter>,
+   document.querySelector('#root')
+)
 
 // Helper function to make console.logs faster
 function l(m){

@@ -9,8 +9,8 @@ module.exports = {
    },
    module: {
       loaders: [{
-         test: /\.css$/,
-         use: ['style-loader', 'css-loader'],
+         test: /\.styl$/,
+         use: ['style-loader', 'css-loader', 'stylus-loader'],
          include: /src/
       }, {
          loader: 'babel-loader',
@@ -26,6 +26,7 @@ module.exports = {
    },
    plugins: [new htmlPlugin({
       title: "Dapp for descentralized transactions",
+      template: './src/templates/index.ejs',
       hash: true
    })]
 }

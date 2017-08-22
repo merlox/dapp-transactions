@@ -1,5 +1,5 @@
 import React from 'react'
-import './../css/index.css'
+import './../stylus/index.styl'
 
 class SellerForm extends React.Component {
    constructor(props){
