@@ -1,0 +1,106 @@
+blueColor = #5b9fbe
+greyColor = #666666
+greenColor = #91ce93
+
+.banner
+   background-image: url(/img/banner.png)
+   height: 70%
+   color: white
+   display: flex
+   justify-content: center
+   align-items: center
+   text-align: center
+   font-size: 1.8em
+
+   h1
+      text-shadow: 0 0 10px black
+      margin-top: -40px
+
+.banner-shadow
+   box-shadow: 0 10px 100px 0 rgb(168, 168, 168)
+   border-radius: 1px
+   width: 85%
+   display: block
+   margin: auto
+   padding: 30px;
+   margin-top: -80px;
+   line-height: 25px;
+   background-color: white;
+   padding-bottom: 80px
+   text-align: center
+   color: blueColor
+
+   i
+      color: greyColor
+
+   .legend-container
+      border: 1px solid greenColor
+      padding: 0 20px
+      position: relative
+      margin-top: 60px
+
+      h2
+         color: greyColor
+         background-color: white
+         position: relative
+         top: -35px
+         font-size: 20pt
+         max-width: 450px;
+         text-align: center;
+         margin: 20px auto;
+
+      a
+         color: greenColor
+
+      .button-container
+         background-color: #fff
+         display: inline-block
+         position: relative
+         width: 220px
+         bottom: -32px
+
+         button
+            background-color: #81c784
+            padding: 15px 30px
+            border: none
+            color: #fff
+            border-radius: 50px
+            font-weight: bold
+            font-size: 20pt
+            margin: auto
+            display: block
+            position: relative
+            cursor: pointer
+
+            &:hover
+               background-color: #58c95d
+
+.video-block
+   height: 200px
+
+   h2
+      color: blueColor
+      text-align: center
+      padding: 20px 5px
+      font-size: 20pt
+      margin: 50px
+
+   img
+      width: 90%
+      max-width: 1200px
+      display: block
+      margin: auto
+      margin-bottom: 200px
+      cursor: pointer
+
+      &:hover
+         opacity: 0.8
+
+@media (max-width: 750px)
+   .banner
+      font-size: 1.4em
+
+@media (min-width: 1200px)
+   .banner-shadow
+      padding: 40px 80px
+      padding-bottom: 80px

@@ -2,6 +2,9 @@ menuWidth = 220px
 mainColor = #5b9fbe
 secondaryColor = #84b7ce
 
+*
+   box-sizing: border-box
+
 html
    height: 100%
 
@@ -10,14 +13,15 @@ html
       height: 100%
       font-family: 'roboto'
 
-.banner
-   background-image: url(/img/banner.png)
-   height: 70%
-   color: white
-   display: flex
-   justify-content: center
-   align-items: center
-   text-align: center
+#root
+   height: 100%
+
+   .site-container
+      height: 100%
+      overflow-x: hidden
+
+      .site-pusher
+         height: 100%
 
 .main-container
    max-width: 1000px
@@ -41,52 +45,34 @@ input, select
    transform: translateX(menuWidth)
    transition: 0.3s ease-out
 
-#root
-   height: 100%
-
-   .site-container
-      height: 100%
-
-      .site-pusher
-         height: 100%
-
 header
    height: 60px
-   box-shadow: 0px 1px 10px 0 grey
+   box-shadow: 0px 1px 10px 0 black
    background-color: mainColor
    line-height: 60px
    position: fixed
    right: 0
    left: 0
-
-   .header-icon
-      position: relative
-      display: block
-      float: left
-      width: 50px
-      height: 60px
-      cursor: pointer
-
-      &::after
-         content: ''
-         position: absolute
-         display: block
-         width: 1rem
-         height: 0
-         top: 15px
-         left: 15px
-         box-shadow: 0 10px 0 1px #fff, 0 16px 0 1px #fff, 0 22px 0 1px #fff
+   padding: 0 calc(10% - 30px)
 
    .header-logo
       float: left
-      padding: 5px 30px
+      padding: 5px 0
 
    nav
+      float: right
+      display: flex
+      align-items: center
+      justify-content: flex-end
+      width: calc(100% - 155px)
+      max-width: 900px
+
       .log-out-button
          border-radius: 50px
          background-color: #81c784
-         margin: auto
-         width: menuWidth - 40px
+         width: 120px
+         height: 40px
+         line-height: 40px
 
          .log-out-button-icon
             left: 9px
@@ -96,10 +82,11 @@ header
       a
          text-decoration: none
          color: #fff
-         height: 50px
-         display: block
+         height: 60px
+         display: inline-block
          text-align: center
-         line-height: 50px
+         line-height: 60px
+         padding: 0 5px
 
          &:hover
             background-color: secondaryColor
@@ -120,11 +107,14 @@ header
       top: 0
       bottom: 0
 
-@media (max-width: 700px)
+@media (max-width: 900px)
    header
       position: static
+      box-shadow: 0px 1px 10px 0 black
 
       nav
+         width: auto
+         display: block
          width: menuWidth
          background-color: mainColor
          position: absolute
@@ -133,8 +123,42 @@ header
          bottom: 0
          transform: translateX(- menuWidth)
 
+         .log-out-button
+            margin: auto
+
+         a
+            display: block
+
+      .header-icon
+         position: relative
+         display: block
+         float: left
+         width: 50px
+         height: 60px
+         cursor: pointer
+
+         &::after
+            content: ''
+            position: absolute
+            display: block
+            width: 1rem
+            height: 0
+            top: 15px
+            left: 15px
+            box-shadow: 0 10px 0 1px #fff, 0 16px 0 1px #fff, 0 22px 0 1px #fff
+
    .site-content
       padding-top: 0
 
-      .banner
-         font-size: 1.4em
+for i in 1..4
+   @media (min-width: 900+(50*i)px)
+      header
+         nav
+            a
+               padding: 0 5+(2.5*i)px
+
+@media (min-width: 1200px)
+   header
+      nav
+         a
+            padding: 0 20px
