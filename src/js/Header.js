@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 class Header extends React.Component {
    constructor(props){
@@ -13,7 +14,7 @@ class Header extends React.Component {
       return (
          <header>
             <a href="#" className="header-icon" onClick={() => {this.toggleMenu(true)}}></a>
-            <img src="img/logo.png" className="header-logo"/>
+            <Link to="/"><img src="img/logo.png" className="header-logo"/></Link>
 
             <nav>
                <a href="#">Home</a>

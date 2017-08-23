@@ -3,6 +3,9 @@ mainColor = #5b9fbe
 standardFont = 14pt
 borderRadius = 5px
 
+.expand-retailers
+   transform: translateY(480px)
+
 .title
    color: greyColor
    text-align: center
@@ -10,8 +13,10 @@ borderRadius = 5px
 
 .icon-box-container
    display: flex
-   justify-content: center
+   justify-content: space-around
    align-items: center
+   max-width: 1200px
+   margin: auto
 
    .icon-box
       color: greyColor
@@ -24,83 +29,82 @@ borderRadius = 5px
 
       .dialog-box
          border: 1px solid mainColor
-         padding: 15px 70px
+         padding: 15px 50px
          border-radius: borderRadius
-         position: relative
+         position: absolute
+         left: 20px
+         right: 20px
+         max-width: 1200px
+         margin: auto
 
-         .piramid
-            width: 0
-            height: 0
-            border: 10px solid transparent
-            border-bottom: 10px solid mainColor
-            position: absolute
-            top: -20px
-            z-index: 20
-            left: 50%
-            transform: translateX(-50%)
-
-         h3
-            margin: 0
-            margin-bottom: 40px
-            color: mainColor
-
-         .product-title
-            color: mainColor
-
-         .product-price
-            font-size: standardFont
-            font-weight: bold
-            margin: 0
-
-         .qty
-            color: greyColor
-            font-size: 10pt
-
-         .counter-container
-            border: 1px solid mainColor
-            width: 180px
-            margin: auto
-            border-radius: borderRadius
+         .dialog-box-items
             display: flex
-            justify-content: space-between
+            justify-content: space-around
 
-            .counter-sign
-               color: mainColor
-               background-color: transparent
-               border: none
-               font-size: standardFont
-               padding: 10px 15px
-               cursor: pointer
+            .dialog-box-item
+               h3
+                  margin: 0
+                  margin-bottom: 40px
+                  color: mainColor
 
-               &:hover
-                  background-color: whitesmoke
+               .product-title
+                  color: mainColor
 
-               &:active
-                  background-color: lightgrey
+               .product-price
+                  font-size: standardFont
+                  font-weight: bold
+                  margin: 0
 
-            .qty-selected
-               font-size: standardFont
-               font-weight: bold
-               line-height: 50px
+               .qty
+                  color: greyColor
+                  font-size: 10pt
 
-         .checkout-button
-            border-radius: borderRadius
-            background-color: #424242
-            font-size: standardFont
-            padding: 20px 50px
-            color: white
-            border: none
-            margin-top: 20px
-            cursor: pointer
+               .counter-container
+                  border: 1px solid mainColor
+                  width: 180px
+                  margin: auto
+                  border-radius: borderRadius
+                  display: flex
+                  justify-content: space-between
 
-            &:hover
-               background-color: #2e2e2e
+                  .counter-sign
+                     color: mainColor
+                     background-color: transparent
+                     border: none
+                     font-size: standardFont
+                     padding: 10px 15px
+                     cursor: pointer
 
-            &:active
-               background-color: #171717
+                     &:hover
+                        background-color: whitesmoke
+
+                     &:active
+                        background-color: lightgrey
+
+                  .qty-selected
+                     font-size: standardFont
+                     font-weight: bold
+                     line-height: 50px
+
+               .checkout-button
+                  border-radius: borderRadius
+                  background-color: #424242
+                  font-size: standardFont
+                  padding: 20px 50px
+                  color: white
+                  border: none
+                  margin-top: 20px
+                  cursor: pointer
+
+                  &:hover
+                     background-color: #2e2e2e
+
+                  &:active
+                     background-color: #171717
 
 .wholesalers-container
    background-color: whitesmoke
+   transition: all 0.3s ease-out
 
    h2
       color: mainColor
@@ -109,5 +113,47 @@ borderRadius = 5px
       font-size: 25pt
 
 @media (max-width: 750px)
+
    .icon-box-container
       flex-direction: column
+
+      .icon-box
+         .dialog-box
+            padding: 15px 70px
+            position: relative
+            left: 0
+            right: 0
+
+            &:after
+            &:before
+            	bottom: 100%
+            	left: 50%
+            	border: solid transparent
+            	content: " "
+            	height: 0
+            	width: 0
+            	position: absolute
+            	pointer-events: none
+
+            &:after
+            	border-color: rgba(255, 255, 255, 0)
+            	border-bottom-color: #ffffff
+            	border-width: 20px
+            	margin-left: -20px
+
+            &:before
+            	border-color: rgba(91, 159, 190, 0)
+            	border-bottom-color: #5b9fbe
+            	border-width: 22px
+            	margin-left: -22px
+
+            .dialog-box-items
+               flex-direction: column
+
+               .dialog-box-item
+                  &:not(:first-child)
+                     padding-top: 20px
+
+                  &:not(:last-child)
+                     border-bottom: 1px solid lightgrey
+                     padding-bottom: 20px
