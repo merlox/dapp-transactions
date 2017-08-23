@@ -20,6 +20,7 @@ greenColor = #91ce93
    box-shadow: 0 10px 100px 0 rgb(168, 168, 168)
    border-radius: 1px
    width: 85%
+   max-width: 1500px
    display: block
    margin: auto
    padding: 30px;
@@ -56,11 +57,13 @@ greenColor = #91ce93
          background-color: #fff
          display: inline-block
          position: relative
-         width: 220px
+         width: 300px
          bottom: -32px
+         padding: 0 40px
 
-         button
+         .button-second-page
             background-color: #81c784
+            text-decoration: none
             padding: 15px 30px
             border: none
             color: #fff
@@ -99,6 +102,15 @@ greenColor = #91ce93
 @media (max-width: 750px)
    .banner
       font-size: 1.4em
+
+   .banner-shadow
+      .legend-container
+         .button-container
+            width: 200px
+            padding: 0 10px
+
+            .button-second-page
+               font-size: 15pt
 
 @media (min-width: 1200px)
    .banner-shadow

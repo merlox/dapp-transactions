@@ -6,6 +6,7 @@ import PropTypes from 'prop-types'
 import BuyerForm from './BuyerForm.js'
 import SellerForm from './SellerForm.js'
 import HomePage from './HomePage'
+import SecondPage from './SecondPage'
 import IPFS from 'ipfs'
 import temporaryContract from './../temporaryContract.json'
 import './../stylus/index.styl'
@@ -439,6 +440,7 @@ class Main extends React.Component {
       return (
          <Switch>
             <Route exact path="/" component={HomePage} />
+            <Route path="/retailer" component={SecondPage} />
             <Route path="/seller" render={() => (
                <SellerForm
                   {...this.state}

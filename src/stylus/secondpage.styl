@@ -1,0 +1,113 @@
+greyColor = #666666
+mainColor = #5b9fbe
+standardFont = 14pt
+borderRadius = 5px
+
+.title
+   color: greyColor
+   text-align: center
+   margin: 40px 0
+
+.icon-box-container
+   display: flex
+   justify-content: center
+   align-items: center
+
+   .icon-box
+      color: greyColor
+      font-size: 16pt
+      padding: 20px
+      text-align: center
+
+      img
+         cursor: pointer
+
+      .dialog-box
+         border: 1px solid mainColor
+         padding: 15px 70px
+         border-radius: borderRadius
+         position: relative
+
+         .piramid
+            width: 0
+            height: 0
+            border: 10px solid transparent
+            border-bottom: 10px solid mainColor
+            position: absolute
+            top: -20px
+            z-index: 20
+            left: 50%
+            transform: translateX(-50%)
+
+         h3
+            margin: 0
+            margin-bottom: 40px
+            color: mainColor
+
+         .product-title
+            color: mainColor
+
+         .product-price
+            font-size: standardFont
+            font-weight: bold
+            margin: 0
+
+         .qty
+            color: greyColor
+            font-size: 10pt
+
+         .counter-container
+            border: 1px solid mainColor
+            width: 180px
+            margin: auto
+            border-radius: borderRadius
+            display: flex
+            justify-content: space-between
+
+            .counter-sign
+               color: mainColor
+               background-color: transparent
+               border: none
+               font-size: standardFont
+               padding: 10px 15px
+               cursor: pointer
+
+               &:hover
+                  background-color: whitesmoke
+
+               &:active
+                  background-color: lightgrey
+
+            .qty-selected
+               font-size: standardFont
+               font-weight: bold
+               line-height: 50px
+
+         .checkout-button
+            border-radius: borderRadius
+            background-color: #424242
+            font-size: standardFont
+            padding: 20px 50px
+            color: white
+            border: none
+            margin-top: 20px
+            cursor: pointer
+
+            &:hover
+               background-color: #2e2e2e
+
+            &:active
+               background-color: #171717
+
+.wholesalers-container
+   background-color: whitesmoke
+
+   h2
+      color: mainColor
+      text-align: center
+      padding: 50px
+      font-size: 25pt
+
+@media (max-width: 750px)
+   .icon-box-container
+      flex-direction: column

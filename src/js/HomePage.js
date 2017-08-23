@@ -1,5 +1,6 @@
 import React from 'react'
 import Header from './Header'
+import {Link} from 'react-router-dom'
 import './../stylus/index.styl'
 import './../stylus/homepage.styl'
 
@@ -39,7 +40,7 @@ class HomePage extends React.Component {
                         <p>To be running a web browser running the <a href="https://metamask.io/">MetaMask</a> or <a href="https://github.com/ethereum/mist">Mist plugin</a>.</p>
                         <p>You will also need to have some ether in your wallet.</p>
                         <div className="button-container">
-                           <button>Start Demo</button>
+                           <Link to="/retailer" className="button-second-page">Start Demo</Link>
                         </div>
                      </div>
                   </div>
