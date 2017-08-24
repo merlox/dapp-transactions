@@ -7,9 +7,9 @@ import BuyerForm from './BuyerForm.js'
 import SellerForm from './SellerForm.js'
 import HomePage from './HomePage'
 import SecondPage from './SecondPage'
+import PurchasePage from './PurchasePage'
 import IPFS from 'ipfs'
 import temporaryContract from './../temporaryContract.json'
-import './../stylus/index.styl'
 
 const signReturnUrl = 'http://localhost:8080/'
 
@@ -23,7 +23,6 @@ class Main extends React.Component {
       super(props, context)
 
       this.state = {
-         ipfs: null,
          ContractInstance: null,
          displayBuyerForm: true,
          displayAreYouSure: false,
@@ -34,10 +33,9 @@ class Main extends React.Component {
    componentDidMount(){
       this.initState.bind(this)(done => {
          this.generateBuyerAddressSelect.bind(this)()
-         setTimeout(() => {
-            this.generateBuyerAddressSelect.bind(this)()
-            this.checkPendingTransactions.bind(this)()
-         }, 1e3)
+
+         // TODO activate this
+         // this.checkPendingTransactions.bind(this)()
       })
    }
 
@@ -436,11 +434,24 @@ class Main extends React.Component {
       })
    }
 
+   checkoutItem(dataObject){
+      this.setState(dataObject)
+
+      this.context.router.history.push('/purchase')
+   }
+
    render(){
       return (
          <Switch>
             <Route exact path="/" component={HomePage} />
-            <Route path="/retailer" component={SecondPage} />
+            <Route path="/retailer" render={() => (
+               <SecondPage
+                  checkoutItem={data => this.checkoutItem(data)}
+               />
+            )} />
+            <Route path="/purchase" render={() => (
+               <PurchasePage {...this.state} />
+            )} />
             <Route path="/seller" render={() => (
                <SellerForm
                   {...this.state}

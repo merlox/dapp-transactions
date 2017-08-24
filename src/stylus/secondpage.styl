@@ -4,7 +4,7 @@ standardFont = 14pt
 borderRadius = 5px
 
 .expand-retailers
-   transform: translateY(480px)
+   transform: translateY(550px)
 
 .title
    color: greyColor
@@ -29,7 +29,7 @@ borderRadius = 5px
 
       .dialog-box
          border: 1px solid mainColor
-         padding: 15px 50px
+         padding: 50px 50px
          border-radius: borderRadius
          position: absolute
          left: 20px
@@ -37,9 +37,39 @@ borderRadius = 5px
          max-width: 1200px
          margin: auto
 
+         &:after
+         &:before
+            bottom: 100%
+            left: 50%
+            border: solid transparent
+            content: " "
+            height: 0
+            width: 0
+            position: absolute
+            pointer-events: none
+
+         &:after
+            border-color: rgba(255, 255, 255, 0)
+            border-bottom-color: #ffffff
+            border-width: 20px
+            margin-left: -20px
+
+         &:before
+            border-color: rgba(91, 159, 190, 0)
+            border-bottom-color: #5b9fbe
+            border-width: 22px
+            margin-left: -22px
+
+         h3
+            margin: 0
+            margin-bottom: 40px
+
          .dialog-box-items
             display: flex
             justify-content: space-around
+
+            .dialog-border
+               border-left: 1px solid lightblue
 
             .dialog-box-item
                h3
@@ -102,9 +132,18 @@ borderRadius = 5px
                   &:active
                      background-color: #171717
 
+
+      for i in 1..4
+         .dialog-number-{i}
+            &:after
+            &:before
+               left: (12 + (25*i - 25))%
+
+
 .wholesalers-container
    background-color: whitesmoke
    transition: all 0.3s ease-out
+   padding-bottom: 100px
 
    h2
       color: mainColor
@@ -119,11 +158,12 @@ borderRadius = 5px
 
       .icon-box
          .dialog-box
-            padding: 15px 70px
+            padding: 50px 70px
             position: relative
             left: 0
             right: 0
 
+            /* Arrow of the box */
             &:after
             &:before
             	bottom: 100%

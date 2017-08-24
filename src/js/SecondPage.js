@@ -14,6 +14,7 @@ class SecondPage extends React.Component {
          dialog4: false,
          oneActive: false,
          isMobile: false,
+         menuOpen: false,
       }
 
       this.updateWindowDimensions = this.updateWindowDimensions.bind(this)
@@ -35,7 +36,7 @@ class SecondPage extends React.Component {
          this.setState({ isMobile: false })
    }
 
-   toggleMenu(open){
+   openMenu(open){
       if(open)
          this.refs['site-pusher'].className = 'site-pusher menu-open'
       else
@@ -45,8 +46,11 @@ class SecondPage extends React.Component {
    render(){
       return (
          <div className="site-container">
-            <div ref='site-pusher' className='site-pusher'>
-               <Header handleMenu={state => this.toggleMenu(state)} />
+            <div ref="site-pusher"
+               className={this.state.menuOpen ? 'site-pusher menu-open' : 'site-pusher'}>
+               <Header handleMenu={open => {
+                  this.openMenu(open)
+               }} />
 
                <div className="site-content">
                   <div className="retailers-container">
@@ -66,7 +70,27 @@ class SecondPage extends React.Component {
                            />
                            <p>Garden Gear</p>
 
-                           <Dialog style={{ display: this.state.dialog1 ? 'block' : 'none' }} />
+                           <input ref="retailer1-address" type="hidden"
+                              value="8 sloane square, South Kensignton" />
+                           <input ref="retailer1-city" type="hidden"
+                              value="London" />
+                           <input ref="retailer1-code" type="hidden"
+                              value="SW75RD" />
+
+                           <Dialog
+                              extraClass="dialog-number-1"
+                              style={{ display: this.state.dialog1 ? 'block' : 'none' }}
+                              checkoutItem={data => {
+                                 this.props.checkoutItem({
+                                    ...data,
+                                    retailerName: 'Garden Gear',
+                                    retailerImage: 'img/retailer/garden.png',
+                                    retailerAddress: this.refs['retailer1-address'].value,
+                                    retailerCity: this.refs['retailer1-city'].value,
+                                    retailerCode: this.refs['retailer1-code'].value,
+                                 })
+                              }}
+                           />
                         </div>
                         <div className="icon-box" ref="second-box">
                            <img
@@ -81,7 +105,27 @@ class SecondPage extends React.Component {
                            />
                            <p>Sharp Suits</p>
 
-                           <Dialog style={{ display: this.state.dialog2 ? 'block' : 'none' }} />
+                           <input ref="retailer2-address" type="hidden"
+                              value="8 sloane square, South Kensignton" />
+                           <input ref="retailer2-city" type="hidden"
+                              value="London" />
+                           <input ref="retailer2-code" type="hidden"
+                              value="SW75RD" />
+
+                           <Dialog
+                              extraClass="dialog-number-2"
+                              style={{ display: this.state.dialog2 ? 'block' : 'none' }}
+                              checkoutItem={data => {
+                                 this.props.checkoutItem({
+                                    ...data,
+                                    retailerName: 'Sharp Suits',
+                                    retailerImage: 'img/retailer/suits.png',
+                                    retailerAddress: this.refs['retailer2-address'].value,
+                                    retailerCity: this.refs['retailer2-city'].value,
+                                    retailerCode: this.refs['retailer2-code'].value,
+                                 })
+                              }}
+                           />
                         </div>
                         <div className="icon-box">
                            <img
@@ -96,7 +140,27 @@ class SecondPage extends React.Component {
                            />
                            <p>Toy Box</p>
 
-                           <Dialog style={{ display: this.state.dialog3 ? 'block' : 'none' }} />
+                           <input ref="retailer3-address" type="hidden"
+                              value="8 sloane square, South Kensignton" />
+                           <input ref="retailer3-city" type="hidden"
+                              value="London" />
+                           <input ref="retailer3-code" type="hidden"
+                              value="SW75RD" />
+
+                           <Dialog
+                              extraClass="dialog-number-3"
+                              style={{ display: this.state.dialog3 ? 'block' : 'none' }}
+                              checkoutItem={data => {
+                                 this.props.checkoutItem({
+                                    ...data,
+                                    retailerName: 'Toy Box',
+                                    retailerImage: 'img/retailer/box.png',
+                                    retailerAddress: this.refs['retailer3-address'].value,
+                                    retailerCity: this.refs['retailer3-city'].value,
+                                    retailerCode: this.refs['retailer3-code'].value,
+                                 })
+                              }}
+                           />
                         </div>
                         <div className="icon-box">
                            <img
@@ -111,7 +175,27 @@ class SecondPage extends React.Component {
                            />
                            <p>Rhombus Jewelry</p>
 
-                           <Dialog style={{ display: this.state.dialog4 ? 'block' : 'none' }} />
+                           <input ref="retailer4-address" type="hidden"
+                              value="8 sloane square, South Kensignton" />
+                           <input ref="retailer4-city" type="hidden"
+                              value="London" />
+                           <input ref="retailer4-code" type="hidden"
+                              value="SW75RD" />
+
+                           <Dialog
+                              extraClass="dialog-number-4"
+                              style={{ display: this.state.dialog4 ? 'block' : 'none' }}
+                              checkoutItem={data => {
+                                 this.props.checkoutItem({
+                                    ...data,
+                                    retailerName: 'Rhombus Jewelry',
+                                    retailerImage: 'img/retailer/jewelry.png',
+                                    retailerAddress: this.refs['retailer4-address'].value,
+                                    retailerCity: this.refs['retailer4-city'].value,
+                                    retailerCode: this.refs['retailer4-code'].value,
+                                 })
+                              }}
+                           />
                         </div>
                      </div>
                   </div>
@@ -154,7 +238,9 @@ class Dialog extends React.Component {
 
    render(){
       return (
-         <div className="dialog-box" style={this.props.style}>
+         <div
+            className={'dialog-box ' + (this.props.extraClass ? this.props.extraClass : '')}
+            style={this.props.style} >
             <h3>Choose a product</h3>
 
             <div className="dialog-box-items">
@@ -162,16 +248,21 @@ class Dialog extends React.Component {
                   image="img/retailer/lawnmover.png"
                   name="Lawnmover"
                   price="12.99"
+                  checkoutItem={data => this.props.checkoutItem(data)}
                />
+               <div className="dialog-border"></div>
                <DialogItem
                   image="img/retailer/hedgetrimmer.png"
                   name="Hedgetrimmer"
                   price="12.99"
+                  checkoutItem={data => this.props.checkoutItem(data)}
                />
+               <div className="dialog-border"></div>
                <DialogItem
                   image="img/retailer/mover.png"
                   name="Wheelbarrow"
                   price="12.99"
+                  checkoutItem={data => this.props.checkoutItem(data)}
                />
             </div>
          </div>
@@ -215,7 +306,16 @@ class DialogItem extends React.Component{
                >+</button>
             </div>
 
-            <button className="checkout-button">Checkout</button>
+            <button
+               className="checkout-button"
+               onClick={() => {
+                  this.props.checkoutItem({
+                     itemName: this.props.name,
+                     itemPrice: this.props.price,
+                     itemQuantity: this.state.quantity,
+                  })
+               }}
+            >Checkout</button>
          </div>
       )
    }

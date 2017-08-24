@@ -6,14 +6,10 @@ class Header extends React.Component {
       super(props)
    }
 
-   toggleMenu(open){
-      this.props.handleMenu(open)
-   }
-
    render(){
       return (
          <header>
-            <a href="#" className="header-icon" onClick={() => {this.toggleMenu(true)}}></a>
+            <a href="#" className="header-icon" onClick={() => {this.props.handleMenu(true)}}></a>
             <Link to="/"><img src="img/logo.png" className="header-logo"/></Link>
 
             <nav>
@@ -30,7 +26,7 @@ class Header extends React.Component {
                </a>
             </nav>
 
-            <div className="site-cache" onClick={() => {this.toggleMenu(false)}}></div>
+            <div className="site-cache" onClick={() => {this.props.handleMenu(false)}}></div>
          </header>
       )
    }

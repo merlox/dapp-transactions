@@ -10,6 +10,7 @@ module.exports = {
    module: {
       loaders: [{
          test: /\.styl$/,
+         exclude: /node_modules/,
          use: ['style-loader', 'css-loader', 'stylus-loader'],
          include: /src/
       }, {
@@ -21,6 +22,7 @@ module.exports = {
          }
       }, {
          loader: 'json-loader',
+         exclude: /node_modules/,
          test: /\.json$/
       }]
    },

@@ -17,6 +17,7 @@
     "babel-preset-stage-2": "6.24.1",
     "css-loader": "0.28.5",
     "html-webpack-plugin": "2.30.1",
+    "ipfs": "0.25.1",
     "ipfs-api": "14.1.2",
     "json-loader": "0.5.7",
     "nodemon": "1.11.0",

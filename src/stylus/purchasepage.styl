@@ -1,0 +1,58 @@
+greyColor = #666666
+mainColor = #5b9fbe
+greenColor = #91ce93
+standardFont = 14pt
+borderRadius = 5px
+standardPadding = 30px
+
+.purchase-title
+   color: greenColor
+   text-align: center
+   padding: 60px
+   margin: 0
+   border-bottom: 1px solid lightgrey
+
+.purchase-box-container
+   display: flex
+   justify-content: center
+   align-items: center
+   text-align: center
+   word-break: break-all
+   padding: standardPadding
+
+   .purchase-box
+      h2
+         color: mainColor
+
+      .retailer-name
+         font-size: standardFont
+         font-weight: bold
+
+      .retailer-address
+         color: greyColor
+
+      .horizontal-rule
+         border-bottom: 1px solid lightgrey
+
+      a
+         color: mainColor
+
+.purchase-table
+   border-collapse: collapse
+   padding: standardPadding
+   margin: auto
+
+   thead
+      background-color: mainColor
+      color: white
+
+   td
+      padding: 20px 10px
+
+
+@media (max-width: 750px)
+   .purchase-box-container
+      flex-direction: column
+
+      .purchase-box
+         margin-bottom: 50px
