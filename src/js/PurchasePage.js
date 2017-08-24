@@ -86,11 +86,19 @@ class PurchasePage extends React.Component {
                         </tr>
                         <tr>
                            <td></td>
-                           <td></td>
-                           <td>Total Amount: {'$ ' + this.props.itemPrice}</td>
+                           <td className="purchase-total-amount">Total Amount: </td>
+                           <td>{'$ ' + this.props.itemPrice * this.props.itemQuantity}</td>
                         </tr>
                      </tbody>
                   </table>
+
+                  <div className="purchase-buttons-container">
+                     <button
+                        className="purchase-decline-button"
+                        onClick={() => this.props.declineTransaction()}
+                     >Decline</button>
+                     <button className="purchase-accept-button">Accept and Sign</button>
+                  </div>
                </div>
             </div>
          </div>
@@ -113,7 +121,7 @@ class Box extends React.Component {
             <p className="retailer-address">{this.props.code}</p>
             <div className="horizontal-rule"></div>
             <p>Ledger address</p>
-            <a href={"https://gateway.ipfs" + this.props.ledger}>{this.props.ledger}</a>
+            <a href={"https://gateway.ipfs.io" + this.props.ledger}>{this.props.ledger}</a>
          </div>
       )
    }

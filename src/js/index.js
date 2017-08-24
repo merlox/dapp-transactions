@@ -13,7 +13,6 @@ import temporaryContract from './../temporaryContract.json'
 
 const signReturnUrl = 'http://localhost:8080/'
 
-
 class Main extends React.Component {
    static contextTypes = {
       router: PropTypes.object
@@ -32,7 +31,6 @@ class Main extends React.Component {
 
    componentDidMount(){
       this.initState.bind(this)(done => {
-         this.generateBuyerAddressSelect.bind(this)()
 
          // TODO activate this
          // this.checkPendingTransactions.bind(this)()
@@ -151,17 +149,6 @@ class Main extends React.Component {
 
       checkNewLedgers(done => {
          generateIpfsInvoice()
-      })
-   }
-
-   // Puts the wallet addresses in a <select>
-   generateBuyerAddressSelect(){
-      let nodes = web3.eth.accounts.map(addr => {
-         return <option key={addr}>{addr}</option>
-      })
-
-      this.setState({
-         addressNodes: nodes
       })
    }
 
@@ -440,6 +427,22 @@ class Main extends React.Component {
       this.context.router.history.push('/purchase')
    }
 
+   // Cancel the buying process removing the purchase item state and going back to second page
+   declineFirstTransaction(){
+      this.setState({
+         itemName: undefined,
+         itemPrice: undefined,
+         itemQuantity: undefined,
+         retailerAddress: undefined,
+         retailerCity: undefined,
+         retailerCode: undefined,
+         retailerImage: undefined,
+         retailerName: undefined,
+      })
+
+      this.context.router.history.push('/retailer')
+   }
+
    render(){
       return (
          <Switch>
@@ -450,7 +453,10 @@ class Main extends React.Component {
                />
             )} />
             <Route path="/purchase" render={() => (
-               <PurchasePage {...this.state} />
+               <PurchasePage
+                  {...this.state}
+                  declineTransaction={() => this.declineFirstTransaction()}
+               />
             )} />
             <Route path="/seller" render={() => (
                <SellerForm
