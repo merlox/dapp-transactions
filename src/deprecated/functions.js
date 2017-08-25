@@ -37,6 +37,50 @@ this.getWaitingTransactionAddress(instanceAddress => {
    })
 })
 
+const checkNewLedgers = cb => {
+
+   // If the cash ledger address is empty, then generate a new one with the cash indicated
+   if(data.buyerCashLedgerHashAddress.length <= 0 && data.buyerAssetsLedgerHashAddress.length <= 0){
+      ipfs.files.add(
+         new ipfs.types.Buffer(newCashLedgerAmount)
+      ).then(results => {
+         data.buyerCashLedgerHashAddress = results[0].hash
+
+         this.setState({ buyerCashLedgerHashAddress: results[0].hash })
+
+         ipfs.files.add(
+            new ipfs.types.Buffer(newAssetsLedgerAmount)
+         ).then(results => {
+            data.buyerAssetsLedgerHashAddress = results[0].hash
+
+            this.setState({ buyerAssetsLedgerHashAddress: results[0].hash })
+
+            cb()
+         })
+      })
+   }else if(data.buyerCashLedgerHashAddress.length <= 0){
+      ipfs.files.add(
+         new ipfs.types.Buffer(newCashLedgerAmount)
+      ).then(results => {
+         data.buyerCashLedgerHashAddress = results[0].hash
+
+         this.setState({ buyerCashLedgerHashAddress: results[0].hash })
+
+         cb()
+      })
+   }else if(data.buyerAssetsLedgerHashAddress.length <= 0){
+      ipfs.files.add(
+         new ipfs.types.Buffer(newAssetsLedgerAmount)
+      ).then(results => {
+         data.buyerAssetsLedgerHashAddress = results[0].hash
+
+         this.setState({ buyerAssetsLedgerHashAddress: results[0].hash })
+
+         cb()
+      })
+   }
+}
+
 if(sellerData != undefined){
    newData = {
       ...newData,

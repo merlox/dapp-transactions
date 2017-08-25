@@ -8,34 +8,18 @@ class PurchasePage extends React.Component {
       super(props)
 
       this.state = {
-         isMobile: false,
          menuOpen: false,
       }
-
-      this.updateWindowDimensions = this.updateWindowDimensions.bind(this)
-   }
-
-   componentDidMount() {
-      this.updateWindowDimensions()
-      window.addEventListener('resize', this.updateWindowDimensions)
-   }
-
-   componentWillUnmount() {
-      window.removeEventListener('resize', this.updateWindowDimensions)
-   }
-
-   updateWindowDimensions() {
-      if(window.innerWidth <= 750 && this.state.isMobile === false)
-         this.setState({ isMobile: true })
-      else if(window.innerWidth > 750 && this.state.isMobile)
-         this.setState({ isMobile: false })
    }
 
    render(){
       return (
          <div className="site-container">
             <div className={this.state.menuOpen ? 'site-pusher menu-open' : 'site-pusher'}>
-               <Header handleMenu={open => this.setState({menuOpen: open})} />
+               <Header
+                  handleMenu={open => this.setState({menuOpen: open})}
+                  subRoute={true}
+               />
 
                <div className="site-content">
                   <h1 className="purchase-title">Purchase Order</h1>
@@ -43,11 +27,11 @@ class PurchasePage extends React.Component {
                   <div className="purchase-box-container">
                      <div className="purchase-box">
                         <h2>Seller</h2>
-                        <img src={this.props.retailerImage} />
-                        <p className="retailer-name">{this.props.retailerName}</p>
-                        <p className="retailer-address">{this.props.retailerAddress}</p>
-                        <p className="retailer-address">{this.props.retailerCity}</p>
-                        <p className="retailer-address">{this.props.retailerCode}</p>
+                        <img src={this.props.checkoutData.retailerImage} />
+                        <p className="retailer-name">{this.props.checkoutData.retailerName}</p>
+                        <p className="retailer-address">{this.props.checkoutData.retailerAddress}</p>
+                        <p className="retailer-address">{this.props.checkoutData.retailerCity}</p>
+                        <p className="retailer-address">{this.props.checkoutData.retailerCode}</p>
                      </div>
 
                      <Box
@@ -80,14 +64,14 @@ class PurchasePage extends React.Component {
                      </thead>
                      <tbody>
                         <tr>
-                           <td>{this.props.itemName}</td>
-                           <td>{this.props.itemQuantity}</td>
-                           <td>{'$ ' + this.props.itemPrice}</td>
+                           <td>{this.props.checkoutData.itemName}</td>
+                           <td>{this.props.checkoutData.itemQuantity}</td>
+                           <td>{'$ ' + this.props.checkoutData.itemPrice}</td>
                         </tr>
                         <tr>
                            <td></td>
                            <td className="purchase-total-amount">Total Amount: </td>
-                           <td>{'$ ' + this.props.itemPrice * this.props.itemQuantity}</td>
+                           <td>{'$ ' + this.props.checkoutData.itemPrice * this.props.checkoutData.itemQuantity}</td>
                         </tr>
                      </tbody>
                   </table>
@@ -97,7 +81,10 @@ class PurchasePage extends React.Component {
                         className="purchase-decline-button"
                         onClick={() => this.props.declineTransaction()}
                      >Decline</button>
-                     <button className="purchase-accept-button">Accept and Sign</button>
+                     <button
+                        className="purchase-accept-button"
+                        onClick={() => this.props.acceptTransaction()}
+                     >Accept and Sign</button>
                   </div>
                </div>
             </div>

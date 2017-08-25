@@ -1,8 +1,15 @@
 import React from 'react'
-import Header from './Header'
 import {Link} from 'react-router-dom'
+import Header from './Header'
 import './../stylus/index.styl'
 import './../stylus/homepage.styl'
+
+const LINKS = {
+   home: '/triple-entry',
+   retailer: '/retailer',
+   purchase: '/purchase',
+   order: '/order-sent',
+}
 
 class HomePage extends React.Component {
    constructor(props){
@@ -40,7 +47,7 @@ class HomePage extends React.Component {
                         <p>To be running a web browser running the <a href="https://metamask.io/">MetaMask</a> or <a href="https://github.com/ethereum/mist">Mist plugin</a>.</p>
                         <p>You will also need to have some ether in your wallet.</p>
                         <div className="button-container">
-                           <Link to="/retailer" className="button-second-page">Start Demo</Link>
+                           <Link to={LINKS.home + LINKS.retailer} className="button-second-page">Start Demo</Link>
                         </div>
                      </div>
                   </div>

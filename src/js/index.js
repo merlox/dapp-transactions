@@ -8,10 +8,17 @@ import SellerForm from './SellerForm.js'
 import HomePage from './HomePage'
 import SecondPage from './SecondPage'
 import PurchasePage from './PurchasePage'
+import OrderSentPage from './OrderSentPage'
 import IPFS from 'ipfs'
 import temporaryContract from './../temporaryContract.json'
 
-const signReturnUrl = 'http://localhost:8080/'
+const LINKS = {
+   home: '/triple-entry',
+   retailer: '/retailer',
+   purchase: '/purchase',
+   order: '/order-sent',
+}
+const SIGN_RETURN_URL = `http://localhost:80${LINKS.home + LINKS.order}`
 
 class Main extends React.Component {
    static contextTypes = {
@@ -26,6 +33,9 @@ class Main extends React.Component {
          displayBuyerForm: true,
          displayAreYouSure: false,
          displaySellerForm: false,
+         checkoutData: {},
+         buyerData: {},
+         sellerData: {},
       }
    }
 
@@ -57,50 +67,7 @@ class Main extends React.Component {
       }
    }
 
-   submitBuyerForm(data, newCashLedgerAmount, newAssetsLedgerAmount){
-      const checkNewLedgers = cb => {
-
-         // If the cash ledger address is empty, then generate a new one with the cash indicated
-         if(data.buyerCashLedgerHashAddress.length <= 0 && data.buyerAssetsLedgerHashAddress.length <= 0){
-            ipfs.files.add(
-               new ipfs.types.Buffer(newCashLedgerAmount)
-            ).then(results => {
-               data.buyerCashLedgerHashAddress = results[0].hash
-
-               this.setState({ buyerCashLedgerHashAddress: results[0].hash })
-
-               ipfs.files.add(
-                  new ipfs.types.Buffer(newAssetsLedgerAmount)
-               ).then(results => {
-                  data.buyerAssetsLedgerHashAddress = results[0].hash
-
-                  this.setState({ buyerAssetsLedgerHashAddress: results[0].hash })
-
-                  cb()
-               })
-            })
-         }else if(data.buyerCashLedgerHashAddress.length <= 0){
-            ipfs.files.add(
-               new ipfs.types.Buffer(newCashLedgerAmount)
-            ).then(results => {
-               data.buyerCashLedgerHashAddress = results[0].hash
-
-               this.setState({ buyerCashLedgerHashAddress: results[0].hash })
-
-               cb()
-            })
-         }else if(data.buyerAssetsLedgerHashAddress.length <= 0){
-            ipfs.files.add(
-               new ipfs.types.Buffer(newAssetsLedgerAmount)
-            ).then(results => {
-               data.buyerAssetsLedgerHashAddress = results[0].hash
-
-               this.setState({ buyerAssetsLedgerHashAddress: results[0].hash })
-
-               cb()
-            })
-         }
-      }
+   submitBuyerForm(data){
 
       // First generate an invoice document Then create the smart contract instance with the invoice hash
       const generateIpfsInvoice = () => {
@@ -384,7 +351,7 @@ class Main extends React.Component {
                   clientUserId: 1001,
                   email: combinedData.sellerEmail,
                   recipientId: 1,
-                  returnUrl: signReturnUrl,
+                  returnUrl: SIGN_RETURN_URL,
                   userName: combinedData.sellerName,
                   envelopeId: response.envelopeId,
                }
@@ -421,42 +388,186 @@ class Main extends React.Component {
       })
    }
 
-   checkoutItem(dataObject){
-      this.setState(dataObject)
+   checkoutItem(dataObject) {
+      this.setState({
+         checkoutData: dataObject
+      })
 
-      this.context.router.history.push('/purchase')
+      this.context.router.history.push(LINKS.home + LINKS.purchase)
    }
 
    // Cancel the buying process removing the purchase item state and going back to second page
-   declineFirstTransaction(){
+   declineFirstTransaction() {
       this.setState({
-         itemName: undefined,
-         itemPrice: undefined,
-         itemQuantity: undefined,
-         retailerAddress: undefined,
-         retailerCity: undefined,
-         retailerCode: undefined,
-         retailerImage: undefined,
-         retailerName: undefined,
+         checkoutData: {}
       })
 
-      this.context.router.history.push('/retailer')
+      this.context.router.history.push(LINKS.home + LINKS.retailer)
    }
 
-   render(){
+   acceptTransaction() {
+
+      // 1. Get the conversion price from USD to Ether
+      httpGet('https://coinmarketcap-nexuist.rhcloud.com/api/eth', response => {
+         try{
+            response = JSON.parse(response)
+         }catch(e) {
+            alert('Error getting ether - usd conversion, try again')
+            return console.log('Error getting ether - usd conversion, try again')
+         }
+
+         // Set demo fake data to test the function
+         this.setState({
+            buyerData: {
+               name: 'Example',
+               email: 'merunasgrincalaitis@gmail.com',
+               address: 'Random Address Example, 23',
+               city: 'City Example',
+               code: 'SW3492',
+               ledger: 'QmslulksifhASFIykJFBNSkufbkASFGHkAKSJFH/ledger',
+            },
+            sellerData: {
+               name: this.state.checkoutData.retailerName,
+               email: 'example@example.com',
+               address: this.state.checkoutData.retailerAddress,
+               city: this.state.checkoutData.retailerCity,
+               code: this.state.checkoutData.retailerCode,
+               ledger: 'QmsdfiOIHkfhdskjnWUhyfklHKSjfgkuYWUEkjA/ledger',
+               walletAddress: '0xDKUSYH4328423khjFHS8k32j4FAS324FH9'
+            },
+         }, () => {
+            const usd = response.price.usd
+            const totalPrice = this.state.checkoutData.itemPrice * this.state.checkoutData.itemQuantity
+            const etherCost = totalPrice / usd
+
+            /*
+               We'll use the checkoutData, the buyerData and the sellerData
+            */
+            const invoice = `
+Item name: ${this.state.checkoutData.itemName}
+Item price: $ ${this.state.checkoutData.itemPrice}
+Item quantity: ${this.state.checkoutData.itemQuantity}
+Total cost: $ ${totalPrice}
+
+---
+
+Seller name: ${this.state.sellerData.name}
+Seller email: ${this.state.sellerData.email}
+Seller address: ${this.state.sellerData.address}
+Seller city: ${this.state.sellerData.city}
+Seller code: ${this.state.sellerData.code}
+Seller ledger address: ${this.state.sellerData.ledger}
+Seller wallet address: ${this.state.sellerData.walletAddress}
+
+---
+
+Buyer name: ${this.state.buyerData.name}
+Buyer email: ${this.state.buyerData.email}
+Buyer address: ${this.state.buyerData.address}
+Buyer city: ${this.state.buyerData.city}
+Buyer code: ${this.state.buyerData.code}
+Buyer ledger address: ${this.state.buyerData.ledger}
+Buyer wallet address: ${web3.eth.accounts[0]}
+            `
+            const postBody = {
+               fileContent: btoa(invoice), // Convert data to base64
+               firstEmail: this.state.sellerData.email,
+               firstName: this.state.sellerData.name,
+               secondEmail: this.state.buyerData.email,
+               secondName: this.state.buyerData.name,
+            }
+
+            // 2. Initiate the sign request
+            httpPost('http://esign.comprarymirar.com/first-step', postBody, response => {
+               response = JSON.parse(response)
+
+               let secondStepBody = {
+                  clientUserId: 1001,
+                  email: this.state.sellerData.email,
+                  recipientId: 1,
+                  returnUrl: SIGN_RETURN_URL,
+                  userName: this.state.sellerData.name,
+                  envelopeId: response.envelopeId,
+               }
+
+               // 3. Get the seller sign url & redirect him
+               httpPost('http://esign.comprarymirar.com/second-step', secondStepBody, response => {
+                  let signUrl = JSON.parse(response).url;
+
+                  window.location = signUrl
+               })
+            })
+
+            // const generateIpfsInvoice = () => {
+            //    ipfs.files.add(
+            //       new ipfs.types.Buffer(invoice)
+            //    ).then(invoiceHashAddress => {
+            //
+            //       // This is how solidity will receive the data
+            //       let buyerNameEmail = [
+            //          this.state.buyerData.name, this.state.buyerData.email
+            //       ]
+            //       let sellerNameEmail = [
+            //          this.state.checkoutData.retailerName, this.state.sellerData.email
+            //       ]
+            //       let buyerSellerWalletAddresses = [
+            //          web3.eth.accounts[0], this.state.sellerData.walletAddress
+            //       ]
+            //       let itemQuantityPriceTotalPrice = [
+            //          this.state.checkoutData.itemQuantity,
+            //          this.state.checkoutData.itemPrice,
+            //          totalPrice,
+            //       ]
+            //
+            //       invoiceHashAddress = invoiceHashAddress[0].hash
+            //
+            //       this.setState({ invoiceHashAddress: invoiceHashAddress })
+            //
+            //       // Generate the smart contract instance and save the hash address of the invoice
+            //       this.state.ContractInstance.generateInstance(
+            //          buyerNameEmail,
+            //          sellerNameEmail,
+            //          buyerSellerWalletAddresses,
+            //          quantityPriceItem,
+            //          this.state.checkoutData.itemName,
+            //          itemQuantityPriceTotalPrice,
+            //          invoiceHashAddress,
+            //          this.state.sellerData.ledger,
+            //          this.state.buyerData.ledger, {
+            //             gas: 3000000,
+            //             from: web3.eth.accounts[0],
+            //             value: web3.toWei(etherCost, 'ether')
+            //          }, (err, result) => {
+            //
+            //          l('Invoice hash addres')
+            //          l(invoiceHashAddress)
+            //       })
+            //    })
+            // }
+         })
+
+         // generateIpfsInvoice()
+      })
+   }
+
+   render() {
       return (
          <Switch>
-            <Route exact path="/" component={HomePage} />
-            <Route path="/retailer" render={() => (
+            <Route exact path={LINKS.home} component={HomePage} />
+            <Route path={LINKS.home + LINKS.retailer} render={() => (
                <SecondPage
                   checkoutItem={data => this.checkoutItem(data)}
                />
             )} />
-            <Route path="/purchase" render={() => (
+            <Route path={LINKS.home + LINKS.purchase} render={() => (
                <PurchasePage
                   {...this.state}
                   declineTransaction={() => this.declineFirstTransaction()}
+                  acceptTransaction={() => this.acceptTransaction()}
                />
+            )} />
+            <Route path={LINKS.home + LINKS.order} render={() => (
+               <OrderSentPage />
             )} />
             <Route path="/seller" render={() => (
                <SellerForm
@@ -495,6 +606,16 @@ function l(m){
 }
 
 // Helper function to make Ajax calls
+function httpGet(url, cb){
+   const xhr = new XMLHttpRequest()
+   xhr.open('GET', url)
+   xhr.addEventListener('readystatechange', () => {
+      if(xhr.readyState === XMLHttpRequest.DONE) cb(xhr.responseText)
+   })
+   xhr.send()
+}
+
+// Helper function to make Ajax calls
 function httpPost(url, bodyObject, cb){
    const xhr = new XMLHttpRequest()
    xhr.open('POST', url)
@@ -502,5 +623,5 @@ function httpPost(url, bodyObject, cb){
    xhr.addEventListener('readystatechange', () => {
       if(xhr.readyState === XMLHttpRequest.DONE) cb(xhr.responseText)
    })
-   xhr.send(JSON.stringify(bodyObject));
+   xhr.send(JSON.stringify(bodyObject))
 }

@@ -10,7 +10,7 @@ class Header extends React.Component {
       return (
          <header>
             <a href="#" className="header-icon" onClick={() => {this.props.handleMenu(true)}}></a>
-            <Link to="/"><img src="img/logo.png" className="header-logo"/></Link>
+            <Link to="/"><img src={this.props.subRoute ? '../img/logo.png' : '/img/logo.png'} className="header-logo"/></Link>
 
             <nav>
                <a href="#">Home</a>
@@ -22,7 +22,7 @@ class Header extends React.Component {
                <a href="#">Team</a>
                <a href="#" className="log-out-button">
                   Log out
-                  <img src="img/icon.png" className="log-out-button-icon"/>
+                  <img src={this.props.subRoute ? '../img/icon.png' : 'img/icon.png'} className="log-out-button-icon"/>
                </a>
             </nav>
 
