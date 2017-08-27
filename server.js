@@ -19,6 +19,10 @@ app.get('*/build.js', (req, res) => {
    res.sendFile(path.join(__dirname, 'dist', 'build.js'))
 })
 
+app.get('*/favicon.png', (req, res) => {
+   res.sendFile(path.join(__dirname, 'dist', 'img/favicon.png'))
+})
+
 app.get('*', (req, res) => {
    res.sendFile(path.join(__dirname, 'dist', 'index.html'))
 })

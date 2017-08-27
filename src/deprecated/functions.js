@@ -20,6 +20,72 @@ getWaitingTransactionAddress(cb){
    })
 }
 
+checkPendingTransactions(){
+   this.getFirstPendingTransactionAddress(sellerInstanceAddress => {
+      if(sellerInstanceAddress !== null){
+
+         // Generate the Transaction contract instance and get his data
+         this.setState({
+            TransactionInstance: web3.eth.contract(temporaryContract.abiTransaction).at(sellerInstanceAddress)
+         }, () => {
+            this.state.TransactionInstance.getInitialData((err, initialData) => {
+               this.state.TransactionInstance.getHashAddresses((err, hashAddresses) => {
+                  this.createNotificationSeller(initialData, hashAddresses)
+               })
+            })
+         })
+      }
+   })
+}
+
+getFirstPendingTransactionAddress(cb){
+   const userAddresses = web3.eth.accounts
+
+   this.state.ContractInstance.getPendingTransactionsSellerAddresses((err, pendingTransactionsSellerAddresses) => {
+      for(let i = 0; i < userAddresses.length; i++){
+         for(let j = 0; j < pendingTransactionsSellerAddresses.length; j++){
+            let currentPendingTransactionSellerAddress = pendingTransactionsSellerAddresses[j]
+
+            if(userAddresses[i] === currentPendingTransactionSellerAddress){
+
+               // Get the instance address given the seller address
+               this.state.ContractInstance.getInstanceAddress(currentPendingTransactionSellerAddress, (err, sellerInstanceAddress) => {
+                  return cb(sellerInstanceAddress)
+               })
+            }
+         }
+      }
+
+      return cb(null)
+   })
+}
+
+// If found a pending initiated transaction, execute this
+createNotificationSeller(initialData, hashAddresses, sellerData){
+
+   let newData = {
+      displaySellerForm: false,
+      buyerName: web3.toUtf8(initialData[0]),
+      buyerAddress: initialData[3],
+      buyerEmail: web3.toUtf8(initialData[2]),
+      invoiceHashAddress: web3.toUtf8(hashAddresses[0]),
+      buyerCashLedgerHashAddress: web3.toUtf8(hashAddresses[1]),
+      buyerAssetsLedgerHashAddress: web3.toUtf8(hashAddresses[2]),
+      buyerGPSLocation: web3.toUtf8(initialData[4]),
+      buyerVatNumber: parseInt(initialData[7]),
+      sellerName: web3.toUtf8(initialData[5]),
+      sellerAddress: initialData[1],
+      sellerEmail: web3.toUtf8(initialData[6]),
+      quantityBought: parseInt(initialData[8]),
+      pricePerItem: web3.fromWei(parseInt(initialData[9]), 'ether'),
+      amountPayEther: web3.fromWei(parseFloat(initialData[10]), 'ether'),
+   }
+
+   this.setState(newData, () => {
+      this.context.router.history.push('/seller')
+   })
+}
+
 this.getWaitingTransactionAddress(instanceAddress => {
 
    // Generate the Transaction contract instance and get his data

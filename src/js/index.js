@@ -46,7 +46,20 @@ class Main extends React.Component {
    initState(cb){
       if(typeof web3 != undefined){
          window.web3 = new Web3(web3.currentProvider)
-         window.ipfs = new IPFS()
+         window.ipfs = new IPFS({
+            init: true,
+            start: true,
+            config: {
+               Bootstrap: [
+                  "/dns4/ams-1.bootstrap.libp2p.io/tcp/443/wss/ipfs/QmSoLer265NRgSp2LA3dPaeykiS1J6DifTC88f5uVQKNAd",
+                  "/dns4/lon-1.bootstrap.libp2p.io/tcp/443/wss/ipfs/QmSoLMeWqB7YGVLJN3pNLQpmmEk35v6wYtsMGLzSr5QBU3",
+                  "/dns4/sfo-3.bootstrap.libp2p.io/tcp/443/wss/ipfs/QmSoLPppuBtQSGwKDZT2M73ULpjvfd3aZ6ha4oFGL1KrGM",
+                  "/dns4/sgp-1.bootstrap.libp2p.io/tcp/443/wss/ipfs/QmSoLSafTMBsPKadTEgaXctDQVcqN88CNLHXMkTNwMKPnu",
+                  "/dns4/nyc-1.bootstrap.libp2p.io/tcp/443/wss/ipfs/QmSoLueR4xBeUbY9WZ9xGUUxunbKWcrNFTDAadQJmocnWm",
+                  "/dns4/nyc-2.bootstrap.libp2p.io/tcp/443/wss/ipfs/QmSoLV4Bbm51jM9C4gDYZQ9Cy3U6aXMJDAbzgu2fzaDs64"
+               ]
+            }
+         })
 
          this.setState({
             ContractInstance: web3.eth.contract(temporaryContract.abiManager).at(temporaryContract.address)
@@ -63,79 +76,13 @@ class Main extends React.Component {
       }
    }
 
-   getFirstPendingTransactionAddress(cb){
-      const userAddresses = web3.eth.accounts
-
-      this.state.ContractInstance.getPendingTransactionsSellerAddresses((err, pendingTransactionsSellerAddresses) => {
-         for(let i = 0; i < userAddresses.length; i++){
-            for(let j = 0; j < pendingTransactionsSellerAddresses.length; j++){
-               let currentPendingTransactionSellerAddress = pendingTransactionsSellerAddresses[j]
-
-               if(userAddresses[i] === currentPendingTransactionSellerAddress){
-
-                  // Get the instance address given the seller address
-                  this.state.ContractInstance.getInstanceAddress(currentPendingTransactionSellerAddress, (err, sellerInstanceAddress) => {
-                     return cb(sellerInstanceAddress)
-                  })
-               }
-            }
-         }
-
-         return cb(null)
-      })
-   }
-
-   checkPendingTransactions(){
-      this.getFirstPendingTransactionAddress(sellerInstanceAddress => {
-         if(sellerInstanceAddress !== null){
-
-            // Generate the Transaction contract instance and get his data
-            this.setState({
-               TransactionInstance: web3.eth.contract(temporaryContract.abiTransaction).at(sellerInstanceAddress)
-            }, () => {
-               this.state.TransactionInstance.getInitialData((err, initialData) => {
-                  this.state.TransactionInstance.getHashAddresses((err, hashAddresses) => {
-                     this.createNotificationSeller(initialData, hashAddresses)
-                  })
-               })
-            })
-         }
-      })
-   }
-
-   // If found a pending initiated transaction, execute this
-   createNotificationSeller(initialData, hashAddresses, sellerData){
-
-      let newData = {
-         displaySellerForm: false,
-         buyerName: web3.toUtf8(initialData[0]),
-         buyerAddress: initialData[3],
-         buyerEmail: web3.toUtf8(initialData[2]),
-         invoiceHashAddress: web3.toUtf8(hashAddresses[0]),
-         buyerCashLedgerHashAddress: web3.toUtf8(hashAddresses[1]),
-         buyerAssetsLedgerHashAddress: web3.toUtf8(hashAddresses[2]),
-         buyerGPSLocation: web3.toUtf8(initialData[4]),
-         buyerVatNumber: parseInt(initialData[7]),
-         sellerName: web3.toUtf8(initialData[5]),
-         sellerAddress: initialData[1],
-         sellerEmail: web3.toUtf8(initialData[6]),
-         quantityBought: parseInt(initialData[8]),
-         pricePerItem: web3.fromWei(parseInt(initialData[9]), 'ether'),
-         amountPayEther: web3.fromWei(parseFloat(initialData[10]), 'ether'),
-      }
-
-      this.setState(newData, () => {
-         this.context.router.history.push('/seller')
-      })
-   }
-
    // Kills the contract
    declineSellerTransaction(){
       const instanceAddress = this.state.TransactionInstance.address
 
       this.state.TransactionInstance.buyerAddress((err, buyerAddress) => {
          this.getFirstPendingTransactionAddress(instanceAddress => {
-            this.state.ContractInstance.killInstance(instanceAddress, web3.eth.accounts[0], buyerAddress, (err, result) => {
+            this.state.ContractInstance.methods.killInstance(instanceAddress, web3.eth.accounts[0], buyerAddress, (err, result) => {
 
                // Deleted contract, here is the transaction address: result
             })
@@ -224,84 +171,78 @@ Buyer code: ${this.state.buyerData.code}
 Buyer ledger address: ${this.state.buyerData.ledger}
 Buyer wallet address: ${web3.eth.accounts[0]}
             `
-            const postBody = {
-               fileContent: btoa(invoice), // Convert data to base64
-               firstEmail: this.state.sellerData.email,
-               firstName: this.state.sellerData.name,
-               secondEmail: this.state.buyerData.email,
-               secondName: this.state.buyerData.name,
-            }
 
-            // 2. Initiate the sign request
-            httpPost('http://esign.comprarymirar.com/first-step', postBody, response => {
-               response = JSON.parse(response)
-
-               let secondStepBody = {
-                  clientUserId: 1001,
-                  email: this.state.sellerData.email,
-                  recipientId: 1,
-                  returnUrl: SIGN_RETURN_URL,
-                  userName: this.state.sellerData.name,
-                  envelopeId: response.envelopeId,
+            const signInvoice = () => {
+               const postBody = {
+                  fileContent: btoa(invoice), // Convert data to base64
+                  firstEmail: this.state.sellerData.email,
+                  firstName: this.state.sellerData.name,
+                  secondEmail: this.state.buyerData.email,
+                  secondName: this.state.buyerData.name,
                }
 
-               // 3. Get the seller sign url & redirect him
-               httpPost('http://esign.comprarymirar.com/second-step', secondStepBody, response => {
-                  let signUrl = JSON.parse(response).url;
+               // 2. Initiate the sign request
+               httpPost('http://esign.comprarymirar.com/first-step', postBody, response => {
+                  response = JSON.parse(response)
 
-                  window.location = signUrl
+                  let secondStepBody = {
+                     clientUserId: 1001,
+                     email: this.state.sellerData.email,
+                     recipientId: 1,
+                     returnUrl: SIGN_RETURN_URL,
+                     userName: this.state.sellerData.name,
+                     envelopeId: response.envelopeId,
+                  }
+
+                  // 3. Get the seller sign url & redirect him
+                  httpPost('http://esign.comprarymirar.com/second-step', secondStepBody, response => {
+                     let signUrl = JSON.parse(response).url;
+
+                     window.location = signUrl
+                  })
                })
+            }
+
+            const generateIpfsInstance = done => {
+               ipfs.files.add(
+                  new ipfs.types.Buffer(invoice)
+               ).then(invoiceHashAddress => {
+
+                  let buyerCompleteAddress = `${this.state.buyerData.address} ${this.state.buyerData.city} ${this.state.buyerData.code}`
+                  let sellerCompleteAddress = `${this.state.sellerData.address} ${this.state.sellerData.city} ${this.state.sellerData.code}`
+                  invoiceHashAddress = invoiceHashAddress[0].hash
+
+                  // Generate the smart contract instance and save the hash address of the invoice
+                  this.state.ContractInstance.generateInstance(
+                     this.state.buyerData.name,
+                     this.state.buyerData.email,
+                     web3.eth.accounts[0], // Buyer's wallet address
+                     buyerCompleteAddress,
+                     this.state.sellerData.name,
+                     this.state.sellerData.email,
+                     this.state.sellerData.walletAddress,
+                     sellerCompleteAddress,
+                     this.state.checkoutData.itemName,
+                     parseFloat(this.state.checkoutData.itemPrice),
+                     parseInt(this.state.checkoutData.itemQuantity),
+                     invoiceHashAddress, {
+                        from: web3.eth.accounts[0],
+                        gas: 3000000,
+                        value: web3.toWei(etherCost, 'ether')
+                     }, (err, result) => {
+
+                        l('Invoice hash addres')
+                        l(invoiceHashAddress)
+                        done()
+                  })
+               })
+            }
+
+            generateIpfsInstance(done => {
+               l('Dones')
+               // signInvoice()
             })
-
-            // const generateIpfsInvoice = () => {
-            //    ipfs.files.add(
-            //       new ipfs.types.Buffer(invoice)
-            //    ).then(invoiceHashAddress => {
-            //
-            //       // This is how solidity will receive the data
-            //       let buyerNameEmail = [
-            //          this.state.buyerData.name, this.state.buyerData.email
-            //       ]
-            //       let sellerNameEmail = [
-            //          this.state.checkoutData.retailerName, this.state.sellerData.email
-            //       ]
-            //       let buyerSellerWalletAddresses = [
-            //          web3.eth.accounts[0], this.state.sellerData.walletAddress
-            //       ]
-            //       let itemQuantityPriceTotalPrice = [
-            //          this.state.checkoutData.itemQuantity,
-            //          this.state.checkoutData.itemPrice,
-            //          totalPrice,
-            //       ]
-            //
-            //       invoiceHashAddress = invoiceHashAddress[0].hash
-            //
-            //       this.setState({ invoiceHashAddress: invoiceHashAddress })
-            //
-            //       // Generate the smart contract instance and save the hash address of the invoice
-            //       this.state.ContractInstance.generateInstance(
-            //          buyerNameEmail,
-            //          sellerNameEmail,
-            //          buyerSellerWalletAddresses,
-            //          quantityPriceItem,
-            //          this.state.checkoutData.itemName,
-            //          itemQuantityPriceTotalPrice,
-            //          invoiceHashAddress,
-            //          this.state.sellerData.ledger,
-            //          this.state.buyerData.ledger, {
-            //             gas: 3000000,
-            //             from: web3.eth.accounts[0],
-            //             value: web3.toWei(etherCost, 'ether')
-            //          }, (err, result) => {
-            //
-            //          l('Invoice hash addres')
-            //          l(invoiceHashAddress)
-            //       })
-            //    })
-            // }
          })
-
-         // generateIpfsInvoice()
       })
    }
 
@@ -355,12 +296,14 @@ class App extends React.Component {
    }
 }
 
-ReactDOM.render(
-   <BrowserRouter>
-      <Main />
-   </BrowserRouter>,
-   document.querySelector('#root')
-)
+window.addEventListener('load', () => {
+   ReactDOM.render(
+      <BrowserRouter>
+         <Main />
+      </BrowserRouter>,
+      document.querySelector('#root')
+   )
+})
 
 // Helper function to make console.logs faster
 function l(m){
