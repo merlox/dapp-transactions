@@ -12,7 +12,7 @@ import IPFS from 'ipfs'
 import temporaryContract from './../temporaryContract.json'
 import LINKS from './utils.js'
 
-const SIGN_RETURN_URL = `http://localhost:80/${LINKS.baseUrl}`
+const SIGN_RETURN_URL = `https://ipfs.io${LINKS.home}`
 
 class Main extends React.Component {
    static contextTypes = {
@@ -39,6 +39,11 @@ class Main extends React.Component {
    }
 
    initState(cb){
+
+      // IPFS crypto functions require https in order to work so redirect
+      if(window.location.protocol === 'http:')
+         return window.location = window.location.href.replace('http', 'https')
+
       if(typeof web3 != undefined){
          window.web3 = new Web3(web3.currentProvider)
          window.ipfs = new IPFS({
@@ -56,6 +61,7 @@ class Main extends React.Component {
             }
          })
 
+         // Check if we are in the page after signing to redirect the user to the confirmation page
          if(window.location.search === '?event=signing_complete')
             return this.context.router.history.push(LINKS.home + LINKS.order)
 
@@ -220,8 +226,8 @@ Buyer wallet address: ${web3.eth.accounts[0]}
                      this.state.sellerData.walletAddress,
                      sellerCompleteAddress,
                      this.state.checkoutData.itemName,
-                     web3.toBigNumber(parseFloat(this.state.checkoutData.itemPrice)),
-                     web3.toBigNumber(parseInt(this.state.checkoutData.itemQuantity)),
+                     parseFloat(this.state.checkoutData.itemPrice),
+                     parseInt(this.state.checkoutData.itemQuantity),
                      invoiceHashAddress, {
                         from: web3.eth.accounts[0],
                         gas: 3000000,
