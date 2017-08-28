@@ -220,8 +220,8 @@ Buyer wallet address: ${web3.eth.accounts[0]}
                      this.state.sellerData.walletAddress,
                      sellerCompleteAddress,
                      this.state.checkoutData.itemName,
-                     parseFloat(this.state.checkoutData.itemPrice),
-                     parseInt(this.state.checkoutData.itemQuantity),
+                     web3.toBigNumber(parseFloat(this.state.checkoutData.itemPrice)),
+                     web3.toBigNumber(parseInt(this.state.checkoutData.itemQuantity)),
                      invoiceHashAddress, {
                         from: web3.eth.accounts[0],
                         gas: 3000000,
