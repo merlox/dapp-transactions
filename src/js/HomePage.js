@@ -2,13 +2,7 @@ import React from 'react'
 import {Link} from 'react-router-dom'
 import './../stylus/index.styl'
 import './../stylus/homepage.styl'
-
-const LINKS = {
-   home: '/triple-entry',
-   retailer: '/retailer',
-   purchase: '/purchase',
-   order: '/order-sent',
-}
+import LINKS from './utils.js'
 
 class HomePage extends React.Component {
    constructor(props){
@@ -43,7 +37,7 @@ class HomePage extends React.Component {
             <div className="video-block">
                <h2>If you don't have any ether
                   you can watch a video demonstration here</h2>
-               <img src="img/video.png" />
+               <img src={LINKS.baseUrl + 'img/video.png'} />
             </div>
          </div>
       )

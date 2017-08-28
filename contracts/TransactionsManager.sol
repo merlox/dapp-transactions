@@ -45,7 +45,7 @@ contract TransactionsManager{
    /// @param itemPrice the price in Wei of the item
    /// @param itemQuantity the quantity that you want to buy
    /// @param invoiceHashAddress the IPFS hash address of the generated invoice
-   function generateInstance(
+   function createInstance(
       bytes32 buyerName,
       bytes32 buyerEmail,
       address buyerWalletAddress,

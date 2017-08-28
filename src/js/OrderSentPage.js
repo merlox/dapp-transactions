@@ -2,6 +2,7 @@ import React from 'react'
 import Header from './Header'
 import './../stylus/index.styl'
 import './../stylus/ordersentpage.styl'
+import LINKS from './utils.js'
 
 class OrderSentPage extends React.Component {
    constructor(props) {
@@ -12,7 +13,7 @@ class OrderSentPage extends React.Component {
       return (
          <div style={{height: '100%'}}>
             <div className="order-sent-container">
-               <img src="../img/order-sent/check-last.png" />
+               <img src={LINKS.baseUrl + "img/order-sent/check-last.png"} />
                <h1>Purchase Order Sent</h1>
 
                <div className="order-sent-buttons-container">

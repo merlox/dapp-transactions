@@ -10,14 +10,9 @@ import PurchasePage from './PurchasePage'
 import OrderSentPage from './OrderSentPage'
 import IPFS from 'ipfs'
 import temporaryContract from './../temporaryContract.json'
+import LINKS from './utils.js'
 
-const LINKS = {
-   home: '/triple-entry',
-   retailer: '/retailer',
-   purchase: '/purchase',
-   order: '/order-sent',
-}
-const SIGN_RETURN_URL = `http://localhost:80${LINKS.home + LINKS.order}`
+const SIGN_RETURN_URL = `http://localhost:80/${LINKS.baseUrl}`
 
 class Main extends React.Component {
    static contextTypes = {
@@ -60,6 +55,9 @@ class Main extends React.Component {
                ]
             }
          })
+
+         if(window.location.search === '?event=signing_complete')
+            return this.context.router.history.push(LINKS.home + LINKS.order)
 
          this.setState({
             ContractInstance: web3.eth.contract(temporaryContract.abiManager).at(temporaryContract.address)
@@ -207,13 +205,12 @@ Buyer wallet address: ${web3.eth.accounts[0]}
                ipfs.files.add(
                   new ipfs.types.Buffer(invoice)
                ).then(invoiceHashAddress => {
-
                   let buyerCompleteAddress = `${this.state.buyerData.address} ${this.state.buyerData.city} ${this.state.buyerData.code}`
                   let sellerCompleteAddress = `${this.state.sellerData.address} ${this.state.sellerData.city} ${this.state.sellerData.code}`
                   invoiceHashAddress = invoiceHashAddress[0].hash
 
                   // Generate the smart contract instance and save the hash address of the invoice
-                  this.state.ContractInstance.generateInstance(
+                  this.state.ContractInstance.createInstance(
                      this.state.buyerData.name,
                      this.state.buyerData.email,
                      web3.eth.accounts[0], // Buyer's wallet address
@@ -235,12 +232,12 @@ Buyer wallet address: ${web3.eth.accounts[0]}
                         l(invoiceHashAddress)
                         done()
                   })
-               })
+               }).catch(console.log)
             }
 
             generateIpfsInstance(done => {
                l('Dones')
-               // signInvoice()
+               signInvoice()
             })
          })
       })

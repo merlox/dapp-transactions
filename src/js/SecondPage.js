@@ -2,13 +2,7 @@ import React from 'react'
 import Header from './Header'
 import './../stylus/index.styl'
 import './../stylus/secondpage.styl'
-
-const LINKS = {
-   home: '/triple-entry',
-   retailer: '/retailer',
-   purchase: '/purchase',
-   order: '/order-sent',
-}
+import LINKS from './utils.js'
 
 class SecondPage extends React.Component {
    constructor(props){
@@ -51,7 +45,7 @@ class SecondPage extends React.Component {
                <div className="icon-box-container">
                   <div className="icon-box">
                      <img
-                        src="../img/retailer/garden.png"
+                        src={LINKS.baseUrl + "img/retailer/garden.png"}
                         onClick={() => { this.setState({
                            dialog1: !this.state.dialog1,
                            dialog2: false,
@@ -76,7 +70,7 @@ class SecondPage extends React.Component {
                            this.props.checkoutItem({
                               ...data,
                               retailerName: 'Garden Gear',
-                              retailerImage: '../img/retailer/garden.png',
+                              retailerImage: LINKS.baseUrl + 'img/retailer/garden.png',
                               retailerAddress: this.refs['retailer1-address'].value,
                               retailerCity: this.refs['retailer1-city'].value,
                               retailerCode: this.refs['retailer1-code'].value,
@@ -86,7 +80,7 @@ class SecondPage extends React.Component {
                   </div>
                   <div className="icon-box" ref="second-box">
                      <img
-                        src="../img/retailer/suits.png"
+                        src={LINKS.baseUrl + "img/retailer/suits.png"}
                         onClick={() => { this.setState({
                            dialog1: false,
                            dialog2: !this.state.dialog2,
@@ -111,7 +105,7 @@ class SecondPage extends React.Component {
                            this.props.checkoutItem({
                               ...data,
                               retailerName: 'Sharp Suits',
-                              retailerImage: '../img/retailer/suits.png',
+                              retailerImage: LINKS.baseUrl + "img/retailer/suits.png",
                               retailerAddress: this.refs['retailer2-address'].value,
                               retailerCity: this.refs['retailer2-city'].value,
                               retailerCode: this.refs['retailer2-code'].value,
@@ -121,7 +115,7 @@ class SecondPage extends React.Component {
                   </div>
                   <div className="icon-box">
                      <img
-                        src="../img/retailer/box.png"
+                        src={LINKS.baseUrl + "img/retailer/box.png"}
                         onClick={() => { this.setState({
                            dialog1: false,
                            dialog2: false,
@@ -146,7 +140,7 @@ class SecondPage extends React.Component {
                            this.props.checkoutItem({
                               ...data,
                               retailerName: 'Toy Box',
-                              retailerImage: '../img/retailer/box.png',
+                              retailerImage: LINKS.baseUrl + "img/retailer/box.png",
                               retailerAddress: this.refs['retailer3-address'].value,
                               retailerCity: this.refs['retailer3-city'].value,
                               retailerCode: this.refs['retailer3-code'].value,
@@ -156,7 +150,7 @@ class SecondPage extends React.Component {
                   </div>
                   <div className="icon-box">
                      <img
-                        src="../img/retailer/jewelry.png"
+                        src={LINKS.baseUrl + "img/retailer/jewelry.png"}
                         onClick={() => { this.setState({
                            dialog1: false,
                            dialog2: false,
@@ -181,7 +175,7 @@ class SecondPage extends React.Component {
                            this.props.checkoutItem({
                               ...data,
                               retailerName: 'Rhombus Jewelry',
-                              retailerImage: '../img/retailer/jewelry.png',
+                              retailerImage: LINKS.baseUrl + "img/retailer/jewelry.png",
                               retailerAddress: this.refs['retailer4-address'].value,
                               retailerCity: this.refs['retailer4-city'].value,
                               retailerCode: this.refs['retailer4-code'].value,
@@ -199,19 +193,19 @@ class SecondPage extends React.Component {
 
                <div className="icon-box-container">
                   <div className="icon-box">
-                     <img src="../img/retailer/menswear.png" />
+                     <img src={LINKS.baseUrl + "img/retailer/menswear.png"} />
                      <p>Menswear Stockist</p>
                   </div>
                   <div className="icon-box">
-                     <img src="../img/retailer/toydealer.png" />
+                     <img src={LINKS.baseUrl + "img/retailer/toydealer.png"} />
                      <p>Toy Dealer</p>
                   </div>
                   <div className="icon-box">
-                     <img src="../img/retailer/diamondis.png" />
+                     <img src={LINKS.baseUrl + "img/retailer/diamondis.png"} />
                      <p>Diamondis</p>
                   </div>
                   <div className="icon-box">
-                     <img src="../img/retailer/gardenerworld.png" />
+                     <img src={LINKS.baseUrl + "img/retailer/gardenerworld.png"} />
                      <p>Gardener's World</p>
                   </div>
                </div>
@@ -235,21 +229,21 @@ class Dialog extends React.Component {
 
             <div className="dialog-box-items">
                <DialogItem
-                  image="../img/retailer/lawnmover.png"
+                  image={LINKS.baseUrl + "img/retailer/lawnmover.png"}
                   name="Lawnmover"
                   price="12.99"
                   checkoutItem={data => this.props.checkoutItem(data)}
                />
                <div className="dialog-border"></div>
                <DialogItem
-                  image="../img/retailer/hedgetrimmer.png"
+                  image={LINKS.baseUrl + "img/retailer/hedgetrimmer.png"}
                   name="Hedgetrimmer"
                   price="12.99"
                   checkoutItem={data => this.props.checkoutItem(data)}
                />
                <div className="dialog-border"></div>
                <DialogItem
-                  image="../img/retailer/mover.png"
+                  image={LINKS.baseUrl + "img/retailer/mover.png"}
                   name="Wheelbarrow"
                   price="12.99"
                   checkoutItem={data => this.props.checkoutItem(data)}
