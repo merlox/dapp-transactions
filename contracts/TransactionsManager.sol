@@ -58,7 +58,7 @@ contract TransactionsManager{
       uint itemPrice,
       uint itemQuantity,
       bytes invoiceHashAddress
-   ) payable{
+   ) payable {
 
         Transaction t = new Transaction(
             buyerName,

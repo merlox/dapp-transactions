@@ -41,7 +41,7 @@ class Main extends React.Component {
    initState(cb){
 
       // IPFS crypto functions require https in order to work so redirect
-      if(window.location.protocol === 'http:')
+      if(window.location.protocol === 'http:' && window.location.hostname != 'localhost')
          return window.location = window.location.href.replace('http', 'https')
 
       if(typeof web3 != undefined){
@@ -66,7 +66,7 @@ class Main extends React.Component {
             return this.context.router.history.push(LINKS.home + LINKS.order)
 
          this.setState({
-            ContractInstance: web3.eth.contract(temporaryContract.abiManager).at(temporaryContract.address)
+            ContractInstance: new web3.eth.Contract(temporaryContract.abiManager, temporaryContract.address)
          }, () => {
             ipfs.on('ready', () => {
                l("IPFS node is ready")
@@ -215,11 +215,17 @@ Buyer wallet address: ${web3.eth.accounts[0]}
                   let sellerCompleteAddress = `${this.state.sellerData.address} ${this.state.sellerData.city} ${this.state.sellerData.code}`
                   invoiceHashAddress = invoiceHashAddress[0].hash
 
-                  // Generate the smart contract instance and save the hash address of the invoice
-                  this.state.ContractInstance.createInstance(
-                     this.state.buyerData.name,
+                  console.log('Invoice IPFS address')
+                  console.log(invoiceHashAddress)
+
+                  web3.eth.getAccounts().then(accounts => {
+                     if(accounts === null  || accounts === 'undefined' || accounts.length <= 0)
+                        return alert('Error, could not get the wallet account')
+
+                     console.log('Data')
+                     console.log([this.state.buyerData.name,
                      this.state.buyerData.email,
-                     web3.eth.accounts[0], // Buyer's wallet address
+                     accounts[0], // Buyer's wallet address
                      buyerCompleteAddress,
                      this.state.sellerData.name,
                      this.state.sellerData.email,
@@ -228,15 +234,31 @@ Buyer wallet address: ${web3.eth.accounts[0]}
                      this.state.checkoutData.itemName,
                      parseFloat(this.state.checkoutData.itemPrice),
                      parseInt(this.state.checkoutData.itemQuantity),
-                     invoiceHashAddress, {
-                        from: web3.eth.accounts[0],
-                        gas: 3000000,
-                        value: web3.toWei(etherCost, 'ether')
-                     }, (err, result) => {
+                     invoiceHashAddress])
 
-                        l('Invoice hash addres')
-                        l(invoiceHashAddress)
-                        done()
+                     // Generate the smart contract instance and save the hash address of the invoice
+                     this.state.ContractInstance.methods.createInstance(
+                        this.state.buyerData.name,
+                        this.state.buyerData.email,
+                        accounts[0], // Buyer's wallet address
+                        buyerCompleteAddress,
+                        this.state.sellerData.name,
+                        this.state.sellerData.email,
+                        this.state.sellerData.walletAddress,
+                        sellerCompleteAddress,
+                        this.state.checkoutData.itemName,
+                        parseFloat(this.state.checkoutData.itemPrice),
+                        parseInt(this.state.checkoutData.itemQuantity),
+                        invoiceHashAddress, {
+                           from: accounts[0],
+                           gas: 3000000,
+                           value: web3.utils.toWei(etherCost, 'ether')
+                        }, (err, result) => {
+
+                           l('Invoice hash addres')
+                           l(invoiceHashAddress)
+                           done()
+                     })
                   })
                }).catch(console.log)
             }
