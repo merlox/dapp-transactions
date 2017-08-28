@@ -66,7 +66,7 @@ class Main extends React.Component {
             return this.context.router.history.push(LINKS.home + LINKS.order)
 
          this.setState({
-            ContractInstance: new web3.eth.Contract(temporaryContract.abiManager, temporaryContract.address)
+            ContractInstance: web3.eth.contract(temporaryContract.abiManager).at(temporaryContract.address)
          }, () => {
             ipfs.on('ready', () => {
                l("IPFS node is ready")
@@ -139,7 +139,7 @@ class Main extends React.Component {
                city: this.state.checkoutData.retailerCity,
                code: this.state.checkoutData.retailerCode,
                ledger: 'QmsdfiOIHkfhdskjnWUhyfklHKSjfgkuYWUEkjA/ledger',
-               walletAddress: '0xDKUSYH4328423khjFHS8k32j4FAS324FH9'
+               walletAddress: '0x08f96d0f5C9086d7f6b59F9310532BdDCcF536e2'
             },
          }, () => {
             const usd = response.price.usd
@@ -218,47 +218,42 @@ Buyer wallet address: ${web3.eth.accounts[0]}
                   console.log('Invoice IPFS address')
                   console.log(invoiceHashAddress)
 
-                  web3.eth.getAccounts().then(accounts => {
-                     if(accounts === null  || accounts === 'undefined' || accounts.length <= 0)
-                        return alert('Error, could not get the wallet account')
+                  console.log('Data')
+                  console.log([this.state.buyerData.name,
+                  this.state.buyerData.email,
+                  web3.eth.accounts[0], // Buyer's wallet address
+                  buyerCompleteAddress,
+                  this.state.sellerData.name,
+                  this.state.sellerData.email,
+                  this.state.sellerData.walletAddress,
+                  sellerCompleteAddress,
+                  this.state.checkoutData.itemName,
+                  this.state.checkoutData.itemPrice,
+                  this.state.checkoutData.itemQuantity,
+                  invoiceHashAddress])
 
-                     console.log('Data')
-                     console.log([this.state.buyerData.name,
+                  // Generate the smart contract instance and save the hash address of the invoice
+                  this.state.ContractInstance.createInstance(
+                     this.state.buyerData.name,
                      this.state.buyerData.email,
-                     accounts[0], // Buyer's wallet address
+                     web3.eth.accounts[0], // Buyer's wallet address
                      buyerCompleteAddress,
                      this.state.sellerData.name,
                      this.state.sellerData.email,
                      this.state.sellerData.walletAddress,
                      sellerCompleteAddress,
                      this.state.checkoutData.itemName,
-                     parseFloat(this.state.checkoutData.itemPrice),
-                     parseInt(this.state.checkoutData.itemQuantity),
-                     invoiceHashAddress])
+                     this.state.checkoutData.itemPrice,
+                     this.state.checkoutData.itemQuantity,
+                     invoiceHashAddress, {
+                        from: web3.eth.accounts[0],
+                        gas: 300000,
+                        value: web3.toWei(etherCost, 'ether')
+                     }, (err, result) => {
 
-                     // Generate the smart contract instance and save the hash address of the invoice
-                     this.state.ContractInstance.methods.createInstance(
-                        this.state.buyerData.name,
-                        this.state.buyerData.email,
-                        accounts[0], // Buyer's wallet address
-                        buyerCompleteAddress,
-                        this.state.sellerData.name,
-                        this.state.sellerData.email,
-                        this.state.sellerData.walletAddress,
-                        sellerCompleteAddress,
-                        this.state.checkoutData.itemName,
-                        parseFloat(this.state.checkoutData.itemPrice),
-                        parseInt(this.state.checkoutData.itemQuantity),
-                        invoiceHashAddress, {
-                           from: accounts[0],
-                           gas: 3000000,
-                           value: web3.utils.toWei(etherCost, 'ether')
-                        }, (err, result) => {
-
-                           l('Invoice hash addres')
-                           l(invoiceHashAddress)
-                           done()
-                     })
+                        l('Invoice hash addres')
+                        l(invoiceHashAddress)
+                        done()
                   })
                }).catch(console.log)
             }
