@@ -1,0 +1,129 @@
+greyColor = #666666
+mainColor = #5b9fbe
+greenColor = #91ce93
+standardFont = 14pt
+borderRadius = 5px
+standardPadding = 30px
+
+.purchase-title
+   color: greenColor
+   text-align: center
+   padding: 50px
+   margin: 0
+   border-bottom: 1px solid lightgrey
+   max-width: 1300px
+   margin: auto
+   width: 80%
+
+.purchase-box-container
+   display: flex
+   justify-content: space-between
+   align-items: center
+   text-align: center
+   word-break: break-all
+   padding: standardPadding
+   max-width: 1300px
+   margin: auto
+
+   .purchase-box
+      display: flex
+      flex-direction: column
+      align-items: center
+      justify-content: flex-start
+      max-width: 400px
+      width: 30%
+      height: 430px
+      padding: 10px
+
+      h2
+         color: mainColor
+
+      .retailer-name
+         font-size: standardFont
+         font-weight: bold
+
+      .retailer-address
+         color: greyColor
+
+      .horizontal-rule
+         border-bottom: 1px solid lightgrey
+         width: 100%
+
+      a
+         color: mainColor
+
+.purchase-table
+   border-collapse: collapse
+   padding: standardPadding
+   margin: auto
+   width: 90%
+   max-width: 1300px
+   margin-bottom: 50px
+
+   .purchase-total-amount
+      color: mainColor
+
+   thead
+      background-color: mainColor
+      color: white
+
+   tbody
+      tr:last-child
+         td:nth-last-child(2)
+         td:nth-last-child(3)
+            border-bottom: 0
+
+         td:nth-last-child(2)
+            float: right
+
+   td
+      padding: 20px 10px
+      border-bottom: 1px solid lightgrey
+
+.purchase-buttons-container
+   text-align: center
+   margin-bottom: 100px
+
+   .purchase-decline-button
+      border: 2px solid tomato
+      background-color: transparent
+      color: tomato
+      border-radius: 40px
+      padding: 20px 45px
+      font-size: 17pt
+      margin-right: 20px
+      cursor: pointer
+      transition-duration: 0.2s
+      margin-bottom: 20px
+
+      &:hover
+         background-color: tomato
+         color: white
+
+      &:active
+         background-color: rgb(158, 0, 0)
+         border: 2px solid rgb(158, 0, 0)
+
+   .purchase-accept-button
+      border: none
+      background-color: greenColor
+      color: white
+      border-radius: 40px
+      padding: 20px 45px
+      font-size: 17pt
+      transition-duration: 0.2s
+      cursor: pointer
+
+      &:hover
+         background-color: #5eb360
+
+      &:active
+         background-color: #297d2b
+
+@media (max-width: 750px)
+   .purchase-box-container
+      flex-direction: column
+
+      .purchase-box
+         margin-bottom: 50px
+         width: auto

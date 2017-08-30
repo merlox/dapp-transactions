@@ -1,5 +1,6 @@
 import React from 'react'
 import Header from './Header'
+import { Link } from 'react-router-dom'
 import './../stylus/index.styl'
 import './../stylus/secondpage.styl'
 import LINKS from './utils.js'
@@ -76,6 +77,21 @@ class SecondPage extends React.Component {
                               retailerCode: this.refs['retailer1-code'].value,
                            })
                         }}
+                        item1={{
+                           image: LINKS.baseUrl + "img/retailer/lawnmover.png",
+                           name: "Lawnmover",
+                           price: "12.99",
+                        }}
+                        item2={{
+                           image: LINKS.baseUrl + "img/retailer/hedgetrimmer.png",
+                           name: "Hedgetrimmer",
+                           price: "12.99",
+                        }}
+                        item3={{
+                           image: LINKS.baseUrl + "img/retailer/mover.png",
+                           name: "Wheelbarrow",
+                           price: "12.99",
+                        }}
                      />
                   </div>
                   <div className="icon-box" ref="second-box">
@@ -110,6 +126,21 @@ class SecondPage extends React.Component {
                               retailerCity: this.refs['retailer2-city'].value,
                               retailerCode: this.refs['retailer2-code'].value,
                            })
+                        }}
+                        item1={{
+                           image: LINKS.baseUrl + "img/retailer/suit-jacket.png",
+                           name: "Suit Jacket",
+                           price: "12.99",
+                        }}
+                        item2={{
+                           image: LINKS.baseUrl + "img/retailer/tie.png",
+                           name: "Tie",
+                           price: "12.99",
+                        }}
+                        item3={{
+                           image: LINKS.baseUrl + "img/retailer/shirt.png",
+                           name: "Shirt",
+                           price: "12.99",
                         }}
                      />
                   </div>
@@ -146,6 +177,21 @@ class SecondPage extends React.Component {
                               retailerCode: this.refs['retailer3-code'].value,
                            })
                         }}
+                        item1={{
+                           image: LINKS.baseUrl + "img/retailer/teddy-bear.png",
+                           name: "Teddy Bear",
+                           price: "12.99",
+                        }}
+                        item2={{
+                           image: LINKS.baseUrl + "img/retailer/doll.png",
+                           name: "Doll",
+                           price: "12.99",
+                        }}
+                        item3={{
+                           image: LINKS.baseUrl + "img/retailer/scooter.png",
+                           name: "Scooter",
+                           price: "12.99",
+                        }}
                      />
                   </div>
                   <div className="icon-box">
@@ -181,6 +227,21 @@ class SecondPage extends React.Component {
                               retailerCode: this.refs['retailer4-code'].value,
                            })
                         }}
+                        item1={{
+                           image: LINKS.baseUrl + "img/retailer/diamond-necklace.png",
+                           name: "Diamond Necklace",
+                           price: "12.99",
+                        }}
+                        item2={{
+                           image: LINKS.baseUrl + "img/retailer/diamond-bracelet.png",
+                           name: "Diamond Bracelet",
+                           price: "12.99",
+                        }}
+                        item3={{
+                           image: LINKS.baseUrl + "img/retailer/diamond-ring.png",
+                           name: "Diamond Ring",
+                           price: "12.99",
+                        }}
                      />
                   </div>
                </div>
@@ -193,19 +254,19 @@ class SecondPage extends React.Component {
 
                <div className="icon-box-container">
                   <div className="icon-box">
-                     <img src={LINKS.baseUrl + "img/retailer/menswear.png"} />
+                     <Link to={LINKS.counterSign}><img src={LINKS.baseUrl + "img/retailer/menswear.png"} /></Link>
                      <p>Menswear Stockist</p>
                   </div>
                   <div className="icon-box">
-                     <img src={LINKS.baseUrl + "img/retailer/toydealer.png"} />
+                     <Link to={LINKS.counterSign}><img src={LINKS.baseUrl + "img/retailer/toydealer.png"} /></Link>
                      <p>Toy Dealer</p>
                   </div>
                   <div className="icon-box">
-                     <img src={LINKS.baseUrl + "img/retailer/diamondis.png"} />
+                     <Link to={LINKS.counterSign}><img src={LINKS.baseUrl + "img/retailer/diamondis.png"} /></Link>
                      <p>Diamondis</p>
                   </div>
                   <div className="icon-box">
-                     <img src={LINKS.baseUrl + "img/retailer/gardenerworld.png"} />
+                     <Link to={LINKS.counterSign}><img src={LINKS.baseUrl + "img/retailer/gardenerworld.png"} /></Link>
                      <p>Gardener's World</p>
                   </div>
                </div>
@@ -229,23 +290,23 @@ class Dialog extends React.Component {
 
             <div className="dialog-box-items">
                <DialogItem
-                  image={LINKS.baseUrl + "img/retailer/lawnmover.png"}
-                  name="Lawnmover"
-                  price="12.99"
+                  image={this.props.item1.image}
+                  name={this.props.item1.name}
+                  price={this.props.item1.price}
                   checkoutItem={data => this.props.checkoutItem(data)}
                />
                <div className="dialog-border"></div>
                <DialogItem
-                  image={LINKS.baseUrl + "img/retailer/hedgetrimmer.png"}
-                  name="Hedgetrimmer"
-                  price="12.99"
+                  image={this.props.item2.image}
+                  name={this.props.item2.name}
+                  price={this.props.item2.price}
                   checkoutItem={data => this.props.checkoutItem(data)}
                />
                <div className="dialog-border"></div>
                <DialogItem
-                  image={LINKS.baseUrl + "img/retailer/mover.png"}
-                  name="Wheelbarrow"
-                  price="12.99"
+                  image={this.props.item3.image}
+                  name={this.props.item3.name}
+                  price={this.props.item3.price}
                   checkoutItem={data => this.props.checkoutItem(data)}
                />
             </div>
@@ -281,12 +342,18 @@ class DialogItem extends React.Component{
             <div className="counter-container">
                <button
                   className="counter-sign"
-                  onClick={() => this.updateQuantity(false)}
+                  onClick={e => {
+                     e.preventDefault()
+                     this.updateQuantity(false)
+                  }}
                >-</button>
                <span className="qty-selected">{this.state.quantity}</span>
                <button
                   className="counter-sign"
-                  onClick={() => this.updateQuantity(true)}
+                  onClick={e => {
+                     e.preventDefault()
+                     this.updateQuantity(true)
+                  }}
                >+</button>
             </div>
 

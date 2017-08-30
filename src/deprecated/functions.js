@@ -20,6 +20,37 @@ getWaitingTransactionAddress(cb){
    })
 }
 
+const signInvoice = () => {
+   const postBody = {
+      fileContent: btoa(invoice), // Convert data to base64
+      firstEmail: this.state.sellerData.email,
+      firstName: this.state.sellerData.name,
+      secondEmail: this.state.buyerData.email,
+      secondName: this.state.buyerData.name,
+   }
+
+   // 2. Initiate the sign request
+   httpPost('https://esign.comprarymirar.com/first-step', postBody, response => {
+      response = JSON.parse(response)
+
+      let secondStepBody = {
+         clientUserId: 1001,
+         email: this.state.sellerData.email,
+         recipientId: 1,
+         returnUrl: SIGN_RETURN_URL,
+         userName: this.state.sellerData.name,
+         envelopeId: response.envelopeId,
+      }
+
+      // 3. Get the seller sign url & redirect him
+      httpPost('https://esign.comprarymirar.com/second-step', secondStepBody, response => {
+         let signUrl = JSON.parse(response).url;
+
+         window.location = signUrl
+      })
+   })
+}
+
 checkPendingTransactions(){
    this.getFirstPendingTransactionAddress(sellerInstanceAddress => {
       if(sellerInstanceAddress !== null){

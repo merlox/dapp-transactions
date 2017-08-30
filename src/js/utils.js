@@ -7,6 +7,7 @@ const LINKS = {
    retailer: 'retailer',
    purchase: 'purchase',
    order: 'order-sent',
+   counterSign: 'counter-sign',
 }
 
 export default LINKS

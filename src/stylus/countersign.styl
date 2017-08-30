@@ -1,0 +1,68 @@
+greenColor = #91ce93
+borderRadius = 40px
+
+.sign-title
+   color: greenColor
+   text-align: center
+   padding: 50px
+   margin: 0
+   border-bottom: 1px solid lightgrey
+   max-width: 1300px
+   margin: auto
+   width: 80%
+
+.sign-container
+   padding: 20px
+   text-align: center
+
+   input
+      padding: 25px
+      border-radius: borderRadius
+      margin-right: 20px
+      border: 1px solid #808080
+      width: 300px
+
+   .sign-button-cancel
+      border: 2px solid tomato
+      background-color: transparent
+      color: tomato
+      border-radius: 40px
+      padding: 20px 45px
+      font-size: 17pt
+      cursor: pointer
+      transition-duration: 0.2s
+
+      &:hover
+         background-color: tomato
+         color: white
+
+      &:active
+         background-color: rgb(158, 0, 0)
+         border: 2px solid rgb(158, 0, 0)
+
+   .sign-button-confirm
+      border: none
+      background-color: greenColor
+      color: white
+      border-radius: borderRadius
+      padding: 20px 45px
+      font-size: 17pt
+      transition-duration: 0.2s
+      cursor: pointer
+      margin-right: 20px
+      margin-bottom: 20px
+
+      &:hover
+         background-color: #5eb360
+
+      &:active
+         background-color: #297d2b
+
+@media (max-width: 700px)
+   .sign-container
+      input
+         margin-right: 0
+         margin-bottom: 20px
+
+      p, a
+         word-break: break-all

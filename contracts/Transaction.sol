@@ -1,11 +1,9 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.15;
 
 /// @title Transaction is a contract used to maintain invoice data in the blockchain
 /// as a method to check who sells what
 /// @author Merunas Grincalaitis
 contract Transaction {
-
-   address owner = msg.sender;
 
    bytes32 public sellerName;
    bytes32 public sellerEmail;
@@ -24,12 +22,6 @@ contract Transaction {
    uint public itemPrice;
    uint public itemQuantity;
    uint public timestamp;
-
-   /// @notice Modifier to only allow owner's execution
-   modifier onlyOwner() {
-        if(msg.sender == owner)
-        _;
-    }
 
     /// @notice Constructor to set the initial data of the invoice set by the
     /// buyer, the one who starts the Transaction
@@ -58,8 +50,8 @@ contract Transaction {
       uint _itemPrice,
       uint _itemQuantity,
       bytes _invoiceHashAddress
-    ){
-        timestamp = block.timestamp;
+    ) payable {
+        timestamp = now; // Alias for block.timestamp
         buyerName = _buyerName;
         buyerEmail = _buyerEmail;
         buyerWalletAddress = _buyerWalletAddress;
@@ -74,8 +66,15 @@ contract Transaction {
         invoiceHashAddress = _invoiceHashAddress;
     }
 
-    /// @notice Kills the contract if you're the owner
-   function kill() onlyOwner {
-       selfdestruct(owner);
+   /// @notice Sends the entire ether of this contract (the ether paid for the transaction)
+   /// to the seller when both have signed and confirmed the transaction
+   function releaseFundsSeller() {
+      sellerWalletAddress.transfer(this.balance);
+   }
+
+   /// @notice Sends the entire ether of this contract (the ether paid for the transaction)
+   /// to the buyer when the seller declines the transaction
+   function releaseFundsBuyer() {
+      buyerWalletAddress.transfer(this.balance);
    }
 }
