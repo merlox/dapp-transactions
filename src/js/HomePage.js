@@ -5,13 +5,39 @@ import './../stylus/homepage.styl'
 import LINKS from './utils.js'
 
 class HomePage extends React.Component {
-   constructor(props){
+   constructor(props) {
       super(props)
+
+      this.state = {
+         orderCancelled: false,
+         showVideo: false
+      }
+   }
+
+   componentDidMount() {
+      this.checkOrderDeclined.bind(this)()
+   }
+
+   checkOrderDeclined() {
+      if(window.location.search === '?state=order_cancelled'){
+         this.setState({
+            orderCancelled: true
+         })
+      }
    }
 
    render(){
       return (
          <div style={{height: '100%'}}>
+            <div
+               className="order-cancelled"
+               style={{
+                  display: this.state.orderCancelled ? 'block' : 'none'
+               }}>Transaction Declined<span
+                  className="order-cancelled-close"
+                  onClick={() => this.setState({orderCancelled: false})}
+               >close</span></div>
+
             <div className="banner">
                <h1>Triple Entry <br/>
                   Accounting Demo</h1>
@@ -37,9 +63,33 @@ class HomePage extends React.Component {
             <div className="video-block">
                <h2>If you don't have any ether
                   you can watch a video demonstration here</h2>
-               <img src={LINKS.baseUrl + 'img/video.png'} />
+               <img
+                  style={{display: this.state.showVideo ? 'none' : 'block'}}
+                  src={LINKS.baseUrl + 'img/video.png'}
+                  onClick={() => {
+                     this.setState({showVideo: true})
+                  }}
+               />
+               <div
+                  className="youtube-container"
+                  style={{display: this.state.showVideo ? 'block' : 'none'}}
+               >
+                  <YouTube src="https://www.youtube.com/embed/XwWfaALQ1zI?autoplay=1" />
+               </div>
             </div>
          </div>
+      )
+   }
+}
+
+class YouTube extends React.Component {
+   constructor(props) {
+      super(props)
+   }
+
+   render() {
+      return (
+         <iframe src={this.props.src} width="100%" height="100%" allowFullScreen/>
       )
    }
 }

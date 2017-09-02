@@ -8,11 +8,11 @@ import Header from './Header'
 import SecondPage from './SecondPage'
 import PurchasePage from './PurchasePage'
 import OrderSentPage from './OrderSentPage'
+import OrderCompleted from './OrderCompleted'
+import CounterSign from './CounterSign'
 import IPFS from 'ipfs'
 import temporaryContract from './../temporaryContract.json'
 import LINKS from './utils.js'
-
-const SIGN_RETURN_URL = `http://localhost:80/${LINKS.baseUrl}`
 
 class Main extends React.Component {
    static contextTypes = {
@@ -27,18 +27,22 @@ class Main extends React.Component {
          checkoutData: {},
          buyerData: {},
          sellerData: {},
+         creatingTransaction: false,
+         showRetailers: true,
       }
    }
 
    componentDidMount(){
       this.initState.bind(this)(done => {
-
-         // TODO activate this
-         // this.checkPendingTransactions.bind(this)()
       })
    }
 
    initState(cb){
+
+      // IPFS crypto functions require https in order to work so redirect
+      if(window.location.protocol === 'http:' && window.location.hostname !== 'localhost')
+         return window.location = window.location.href.replace('http', 'https')
+
       if(typeof web3 != undefined){
          window.web3 = new Web3(web3.currentProvider)
          window.ipfs = new IPFS({
@@ -56,6 +60,7 @@ class Main extends React.Component {
             }
          })
 
+         // Check if we are in the page after signing to redirect the user to the confirmation page
          if(window.location.search === '?event=signing_complete')
             return this.context.router.history.push(LINKS.home + LINKS.order)
 
@@ -64,6 +69,9 @@ class Main extends React.Component {
          }, () => {
             ipfs.on('ready', () => {
                l("IPFS node is ready")
+
+               if(web3.eth.accounts[0] === undefined)
+                  alert('Your ethereum wallet haven\'t been detected. Try again reloading the page and make sure that you are connected to the Ethereum\'s Test Network with Metamask, Mist or Parity')
 
                cb()
             })
@@ -107,6 +115,10 @@ class Main extends React.Component {
 
    acceptTransaction() {
 
+      // Avoid creating more than one transaction at the same time
+      if(this.state.creatingTransaction) return
+      else this.setState({creatingTransaction: true})
+
       // 1. Get the conversion price from USD to Ether
       httpGet('https://coinmarketcap-nexuist.rhcloud.com/api/eth', response => {
          try{
@@ -120,20 +132,21 @@ class Main extends React.Component {
          this.setState({
             buyerData: {
                name: 'Example',
-               email: 'merunasgrincalaitis@gmail.com',
+               email: 'merloxdixcontrol@gmail.com',
                address: 'Random Address Example, 23',
                city: 'City Example',
                code: 'SW3492',
                ledger: 'QmslulksifhASFIykJFBNSkufbkASFGHkAKSJFH/ledger',
+               walletAddress: web3.eth.accounts[0],
             },
             sellerData: {
                name: this.state.checkoutData.retailerName,
-               email: 'example@example.com',
+               email: 'merunasgrincalaitis@gmail.com',
                address: this.state.checkoutData.retailerAddress,
                city: this.state.checkoutData.retailerCity,
                code: this.state.checkoutData.retailerCode,
                ledger: 'QmsdfiOIHkfhdskjnWUhyfklHKSjfgkuYWUEkjA/ledger',
-               walletAddress: '0xDKUSYH4328423khjFHS8k32j4FAS324FH9'
+               walletAddress: web3.eth.accounts[0], // TODO change this
             },
          }, () => {
             const usd = response.price.usd
@@ -167,39 +180,11 @@ Buyer address: ${this.state.buyerData.address}
 Buyer city: ${this.state.buyerData.city}
 Buyer code: ${this.state.buyerData.code}
 Buyer ledger address: ${this.state.buyerData.ledger}
-Buyer wallet address: ${web3.eth.accounts[0]}
+Buyer wallet address: ${this.state.buyerData.walletAddress}
             `
 
-            const signInvoice = () => {
-               const postBody = {
-                  fileContent: btoa(invoice), // Convert data to base64
-                  firstEmail: this.state.sellerData.email,
-                  firstName: this.state.sellerData.name,
-                  secondEmail: this.state.buyerData.email,
-                  secondName: this.state.buyerData.name,
-               }
-
-               // 2. Initiate the sign request
-               httpPost('http://esign.comprarymirar.com/first-step', postBody, response => {
-                  response = JSON.parse(response)
-
-                  let secondStepBody = {
-                     clientUserId: 1001,
-                     email: this.state.sellerData.email,
-                     recipientId: 1,
-                     returnUrl: SIGN_RETURN_URL,
-                     userName: this.state.sellerData.name,
-                     envelopeId: response.envelopeId,
-                  }
-
-                  // 3. Get the seller sign url & redirect him
-                  httpPost('http://esign.comprarymirar.com/second-step', secondStepBody, response => {
-                     let signUrl = JSON.parse(response).url;
-
-                     window.location = signUrl
-                  })
-               })
-            }
+            // Save the invoice in the localstorage to have it accessible from the counter sign page
+            localStorage.setItem('invoice', invoice)
 
             const generateIpfsInstance = done => {
                ipfs.files.add(
@@ -208,6 +193,28 @@ Buyer wallet address: ${web3.eth.accounts[0]}
                   let buyerCompleteAddress = `${this.state.buyerData.address} ${this.state.buyerData.city} ${this.state.buyerData.code}`
                   let sellerCompleteAddress = `${this.state.sellerData.address} ${this.state.sellerData.city} ${this.state.sellerData.code}`
                   invoiceHashAddress = invoiceHashAddress[0].hash
+
+                  this.setState({
+                     invoiceLink: `https://gateway.ipfs.io/ipfs/${invoiceHashAddress}`,
+                     invoiceData: invoice,
+                  })
+
+                  console.log('Invoice IPFS address')
+                  console.log(invoiceHashAddress)
+
+                  console.log('Data')
+                  console.log([this.state.buyerData.name,
+                  this.state.buyerData.email,
+                  web3.eth.accounts[0], // Buyer's wallet address
+                  buyerCompleteAddress,
+                  this.state.sellerData.name,
+                  this.state.sellerData.email,
+                  this.state.sellerData.walletAddress,
+                  sellerCompleteAddress,
+                  this.state.checkoutData.itemName,
+                  this.state.checkoutData.itemPrice,
+                  this.state.checkoutData.itemQuantity,
+                  invoiceHashAddress])
 
                   // Generate the smart contract instance and save the hash address of the invoice
                   this.state.ContractInstance.createInstance(
@@ -220,26 +227,62 @@ Buyer wallet address: ${web3.eth.accounts[0]}
                      this.state.sellerData.walletAddress,
                      sellerCompleteAddress,
                      this.state.checkoutData.itemName,
-                     web3.toBigNumber(parseFloat(this.state.checkoutData.itemPrice)),
-                     web3.toBigNumber(parseInt(this.state.checkoutData.itemQuantity)),
+                     this.state.checkoutData.itemPrice,
+                     this.state.checkoutData.itemQuantity,
                      invoiceHashAddress, {
                         from: web3.eth.accounts[0],
-                        gas: 3000000,
                         value: web3.toWei(etherCost, 'ether')
                      }, (err, result) => {
 
                         l('Invoice hash addres')
                         l(invoiceHashAddress)
-                        done()
+
+                        l('Response')
+                        l(result)
+                        done(invoiceHashAddress)
                   })
                }).catch(console.log)
             }
 
-            generateIpfsInstance(done => {
-               l('Dones')
-               signInvoice()
+            const signInvoice = invoiceHashAddress => {
+               let body = {
+               	"email": this.state.sellerData.email,
+               	"signLink": `https://gateway.ipfs.io${LINKS.home}`
+               }
+
+               httpPost('https://comprarymirar.com/send-email', body, response => {
+                  console.log(response)
+
+                  this.context.router.history.push(LINKS.order)
+               })
+            }
+
+            generateIpfsInstance(invoiceHashAddress => {
+               signInvoice(invoiceHashAddress)
             })
          })
+      })
+   }
+
+   // To counter sign the transaction of the seller or decline it
+   completeTransaction(forSeller, sellerName){
+
+      // Releases the funds for the seller or the buyer depending on the choice
+      // made by the seller
+      this.state.ContractInstance.releaseFunds(forSeller, {
+         from: web3.eth.accounts[0]
+      }, (err, result) => {
+         console.log(err)
+         console.log(result)
+
+         this.setState({
+            showRetailers: true
+         })
+
+         if(forSeller)
+            this.context.router.history.push(LINKS.orderCompleted)
+         else
+            this.context.router.history.push(LINKS.home + '?state=order_cancelled')
       })
    }
 
@@ -248,7 +291,9 @@ Buyer wallet address: ${web3.eth.accounts[0]}
          <App {...this.state}>
             <Route exact path={LINKS.home} component={HomePage} />
             <Route path={LINKS.home + LINKS.retailer} render={() => (
-               <SecondPage checkoutItem={data => this.checkoutItem(data)}
+               <SecondPage
+                  showRetailers={this.state.showRetailers}
+                  checkoutItem={data => this.checkoutItem(data)}
                />
             )} />
             <Route path={LINKS.home + LINKS.purchase} render={() => (
@@ -258,7 +303,24 @@ Buyer wallet address: ${web3.eth.accounts[0]}
                   acceptTransaction={() => this.acceptTransaction()}
                />
             )} />
-            <Route path={LINKS.home + LINKS.order} component={OrderSentPage} />
+            <Route path={LINKS.home + LINKS.order} render={() => (
+               <OrderSentPage
+                  hideRetailers={() => this.setState({showRetailers: false})}
+               />
+            )} />
+            <Route path={LINKS.home + LINKS.counterSign} render={() => (
+               <CounterSign
+                  invoiceLink={this.state.invoiceLink}
+                  invoiceData={this.state.invoiceData}
+                  completeTransaction={sellerName => this.completeTransaction(true, sellerName)}
+                  declineFinalTransaction={() => this.completeTransaction(false)}
+               />
+            )} />
+            <Route path={LINKS.home + LINKS.orderCompleted} render={() => (
+               <OrderCompleted
+                  showRetailers={() => this.setState({showRetailers: true})}
+               />
+            )} />
          </App>
       )
    }

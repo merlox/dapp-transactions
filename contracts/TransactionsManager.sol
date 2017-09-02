@@ -1,4 +1,4 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.15;
 
 import "./Transaction.sol";
 
@@ -7,29 +7,23 @@ import "./Transaction.sol";
 /// @author Merunas Grincalaitis
 contract TransactionsManager{
 
-   // Array with the seller addresses of the transactions that are waiting seller's
-   // confirmation and electronic signature
-   address[] pendingTransactionInstancesSellerAddress;
-
-   // Array with the instance addresses of the instances that are signed and confirmed by both parties
-   address[] completedTransactionInstances;
-
-   // Array with the instance addresses of the instances that are cancelled
-   address[] cancelledTransactionInstances;
-
-   // Owner of the contract
-   address owner = msg.sender;
-
    // The address of the instance given the seller's address
+   // sellerAddress => instanceAddress
    mapping(address => address) sellerAddressInstance;
 
+   // Completed seller transactions
+   // sellerAddress => instanceAddress
+   mapping(address => address) sellerEndedTransactions;
+
    // The address of the instance given the buyer's address
+   // buyerAddress => instanceAddress
    mapping(address => address) buyerAddressInstance;
 
-    // Retuns the balance of the contract
-    function getBalance() constant returns(uint){
-        return this.balance;
-    }
+   // Checks that the seller address has an instance
+   modifier existingSellerInstance(address sellerAddress) {
+       require(sellerAddressInstance[sellerAddress] != 0x0);
+       _;
+   }
 
    /// @notice Generates an invoice instance for the buyer `msg.sender` and
    /// saves the instance address in the pending transactions Array
@@ -58,9 +52,10 @@ contract TransactionsManager{
       uint itemPrice,
       uint itemQuantity,
       bytes invoiceHashAddress
-   ) payable{
+   ) payable {
 
-        Transaction t = new Transaction(
+         // Send the ether paid for the transaction when creating the contract
+        Transaction t = (new Transaction).value(msg.value)(
             buyerName,
             buyerEmail,
             buyerWalletAddress,
@@ -75,21 +70,41 @@ contract TransactionsManager{
             invoiceHashAddress
         );
 
-        pendingTransactionInstancesSellerAddress.push(sellerWalletAddress);
         sellerAddressInstance[sellerWalletAddress] = t;
         buyerAddressInstance[buyerWalletAddress] = t;
     }
 
-   /// @notice Constant function to get the array of seller addresses with pending
-   /// transactions waiting for seller confirmation and esign
-   function getPendingTransactionsSellerAddresses() constant returns(address[]){
-       return pendingTransactionInstancesSellerAddress;
-   }
 
-   /// @notice Returns the array of instance addresses of the completed transactions
-   function getCompletedTransactionInstances() constant returns(address[]){
-       return completedTransactionInstances;
-   }
+    /// @notice Releases the funds of the specified contract and ends the instance
+    function releaseFunds(bool forSeller) existingSellerInstance(msg.sender) {
+      Transaction instance = Transaction(sellerAddressInstance[msg.sender]);
+
+      require(msg.sender == instance.sellerWalletAddress() || msg.sender == instance.buyerWalletAddress());
+
+      if(forSeller)
+        instance.releaseFundsSeller();
+      else
+        instance.releaseFundsBuyer();
+    }
+
+    /// @notice Kills an instance by updating this contract's state arrays and
+    /// executing the kill function of the instance. Also stores the instance address
+    /// in the cancelled transactions array
+    /// @param sellerAddress the seller address of the instance to kill
+    /// @param buyerAddress the address of the buyer to update the waiting counter-sign
+    /// state array
+    function endInstance(
+       address sellerAddress,
+       address buyerAddress
+    ) existingSellerInstance(msg.sender) {
+       Transaction instance = Transaction(sellerAddressInstance[sellerAddress]);
+
+       require(msg.sender == instance.sellerWalletAddress() || msg.sender == instance.buyerWalletAddress());
+
+       sellerAddressInstance[sellerAddress] = 0x0;
+       buyerAddressInstance[buyerAddress] = 0x0;
+       sellerEndedTransactions[sellerAddress] = instance;
+    }
 
    /// @notice Returns the instance address given a seller address
    /// @param sellerAddress the address of the seller
@@ -101,32 +116,5 @@ contract TransactionsManager{
    /// @param buyerAddress the address of the buyer
    function getBuyerInstanceAddress(address buyerAddress) constant returns(address){
        return buyerAddressInstance[buyerAddress];
-   }
-
-   /// @notice Returns the array of instance addresses of completed transactions
-   function getCompletedTransactions() constant returns(address[]){
-       return completedTransactionInstances;
-   }
-
-   /// @notice Kills an instance by updating this contract's state arrays and
-   /// executing the kill function of the instance. Also stores the instance address
-   /// in the cancelled transactions array
-   /// @param sellerAddress the seller address of the instance to kill
-   /// @param buyerAddress the address of the buyer to update the waiting counter-sign
-   /// state array
-
-   // TODO check that only the buyer can kill his instance and only if it's still pending
-   function killInstance(
-      address sellerAddress,
-      address buyerAddress
-   ){
-      require(getInstanceAddress(sellerAddress) != 0x0);
-      Transaction t = Transaction(getInstanceAddress(sellerAddress));
-
-      sellerAddressInstance[sellerAddress] = 0x0;
-      buyerAddressInstance[buyerAddress] = 0x0;
-      cancelledTransactionInstances.push(t);
-
-      t.kill();
    }
 }

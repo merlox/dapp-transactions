@@ -1,0 +1,199 @@
+greyColor = #666666
+mainColor = #5b9fbe
+standardFont = 14pt
+borderRadius = 5px
+
+.expand-retailers
+   transform: translateY(550px)
+
+.title
+   color: greyColor
+   text-align: center
+   margin: 40px 0
+
+.icon-box-container
+   display: flex
+   justify-content: space-around
+   align-items: center
+   max-width: 1200px
+   margin: auto
+
+   .icon-box
+      color: greyColor
+      font-size: 16pt
+      padding: 20px
+      text-align: center
+
+      img
+         cursor: pointer
+
+      .dialog-box
+         border: 1px solid mainColor
+         padding: 50px 50px
+         border-radius: borderRadius
+         position: absolute
+         left: 20px
+         right: 20px
+         max-width: 1200px
+         margin: auto
+
+         &:after
+         &:before
+            bottom: 100%
+            left: 50%
+            border: solid transparent
+            content: " "
+            height: 0
+            width: 0
+            position: absolute
+            pointer-events: none
+
+         &:after
+            border-color: rgba(255, 255, 255, 0)
+            border-bottom-color: #ffffff
+            border-width: 20px
+            margin-left: -20px
+
+         &:before
+            border-color: rgba(91, 159, 190, 0)
+            border-bottom-color: #5b9fbe
+            border-width: 22px
+            margin-left: -22px
+
+         h3
+            margin: 0
+            margin-bottom: 40px
+
+         .dialog-box-items
+            display: flex
+            justify-content: space-around
+
+            .dialog-border
+               border-left: 1px solid lightblue
+
+            .dialog-box-item
+               h3
+                  margin: 0
+                  margin-bottom: 40px
+                  color: mainColor
+
+               .product-title
+                  color: mainColor
+
+               .product-price
+                  font-size: standardFont
+                  font-weight: bold
+                  margin: 0
+
+               .qty
+                  color: greyColor
+                  font-size: 10pt
+
+               .counter-container
+                  border: 1px solid mainColor
+                  width: 180px
+                  margin: auto
+                  border-radius: borderRadius
+                  display: flex
+                  justify-content: space-between
+
+                  .counter-sign
+                     color: mainColor
+                     background-color: transparent
+                     border: none
+                     font-size: standardFont
+                     padding: 10px 15px
+                     cursor: pointer
+
+                     &:hover
+                        background-color: whitesmoke
+
+                     &:active
+                        background-color: lightgrey
+
+                  .qty-selected
+                     font-size: standardFont
+                     font-weight: bold
+                     line-height: 50px
+
+               .checkout-button
+                  border-radius: borderRadius
+                  background-color: #424242
+                  font-size: standardFont
+                  padding: 20px 50px
+                  color: white
+                  border: none
+                  margin-top: 20px
+                  cursor: pointer
+
+                  &:hover
+                     background-color: #2e2e2e
+
+                  &:active
+                     background-color: #171717
+
+
+      for i in 1..4
+         .dialog-number-{i}
+            &:after
+            &:before
+               left: (12 + (25*i - 25))%
+
+
+.wholesalers-container
+   background-color: whitesmoke
+   transition: all 0.3s ease-out
+   padding-bottom: 100px
+
+   h2
+      color: mainColor
+      text-align: center
+      padding: 50px
+      font-size: 25pt
+
+@media (max-width: 750px)
+
+   .icon-box-container
+      flex-direction: column
+
+      .icon-box
+         .dialog-box
+            padding: 50px 70px
+            position: relative
+            left: 0
+            right: 0
+
+            /* Arrow of the box */
+            &:after
+            &:before
+            	bottom: 100%
+            	left: 50%
+            	border: solid transparent
+            	content: " "
+            	height: 0
+            	width: 0
+            	position: absolute
+            	pointer-events: none
+
+            &:after
+            	border-color: rgba(255, 255, 255, 0)
+            	border-bottom-color: #ffffff
+            	border-width: 20px
+            	margin-left: -20px
+
+            &:before
+            	border-color: rgba(91, 159, 190, 0)
+            	border-bottom-color: #5b9fbe
+            	border-width: 22px
+            	margin-left: -22px
+
+            .dialog-box-items
+               flex-direction: column
+
+               .dialog-box-item
+                  &:not(:first-child)
+                     padding-top: 20px
+
+                  &:not(:last-child)
+                     border-bottom: 1px solid lightgrey
+                     padding-bottom: 20px

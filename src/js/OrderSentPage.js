@@ -1,5 +1,6 @@
 import React from 'react'
 import Header from './Header'
+import {Link} from 'react-router-dom'
 import './../stylus/index.styl'
 import './../stylus/ordersentpage.styl'
 import LINKS from './utils.js'
@@ -17,8 +18,10 @@ class OrderSentPage extends React.Component {
                <h1>Purchase Order Sent</h1>
 
                <div className="order-sent-buttons-container">
-                  <button className="order-sent-back">Back to Login</button>
-                  <button className="order-sent-login">Login as Wholesaler</button>
+                  <Link to={LINKS.home} className="order-sent-back">Back to Login</Link>
+                  <Link to={LINKS.retailer}
+                     onClick={() => {this.props.hideRetailers()}}
+                     className="order-sent-login">Login as Wholesaler</Link>
                </div>
             </div>
          </div>
