@@ -41,7 +41,7 @@ class SecondPage extends React.Component {
       return (
          <div style={{height: '100%'}}>
             <div
-               style={{display: this.props.showRetailers ? 'block' : 'none'}} 
+               style={{display: this.props.showRetailers ? 'block' : 'none'}}
                className="retailers-container">
                <h1 className="title">Choose a Retailer</h1>
 
@@ -258,21 +258,6 @@ class SecondPage extends React.Component {
 
                <div className="icon-box-container">
                   <div className="icon-box">
-<<<<<<< HEAD
-                     <img src="../img/retailer/menswear.png" />
-                     <p>Menswear Stockist</p>
-                  </div>
-                  <div className="icon-box">
-                     <img src="../img/retailer/toydealer.png" />
-                     <p>Toy Dealer</p>
-                  </div>
-                  <div className="icon-box">
-                     <img src="../img/retailer/diamondis.png" />
-                     <p>Diamondis</p>
-                  </div>
-                  <div className="icon-box">
-                     <img src="../img/retailer/gardenerworld.png" />
-=======
                      <Link to={LINKS.counterSign}><img src={LINKS.baseUrl + "img/retailer/menswear.png"} /></Link>
                      <p>Menswear Stockist</p>
                   </div>
@@ -286,7 +271,6 @@ class SecondPage extends React.Component {
                   </div>
                   <div className="icon-box">
                      <Link to={LINKS.counterSign}><img src={LINKS.baseUrl + "img/retailer/gardenerworld.png"} /></Link>
->>>>>>> my-temporary-work
                      <p>Gardener's World</p>
                   </div>
                </div>
@@ -310,41 +294,23 @@ class Dialog extends React.Component {
 
             <div className="dialog-box-items">
                <DialogItem
-<<<<<<< HEAD
-                  image="../img/retailer/lawnmover.png"
-                  name="Lawnmover"
-                  price="12.99"
-=======
                   image={this.props.item1.image}
                   name={this.props.item1.name}
                   price={this.props.item1.price}
->>>>>>> my-temporary-work
                   checkoutItem={data => this.props.checkoutItem(data)}
                />
                <div className="dialog-border"></div>
                <DialogItem
-<<<<<<< HEAD
-                  image="../img/retailer/hedgetrimmer.png"
-                  name="Hedgetrimmer"
-                  price="12.99"
-=======
                   image={this.props.item2.image}
                   name={this.props.item2.name}
                   price={this.props.item2.price}
->>>>>>> my-temporary-work
                   checkoutItem={data => this.props.checkoutItem(data)}
                />
                <div className="dialog-border"></div>
                <DialogItem
-<<<<<<< HEAD
-                  image="../img/retailer/mover.png"
-                  name="Wheelbarrow"
-                  price="12.99"
-=======
                   image={this.props.item3.image}
                   name={this.props.item3.name}
                   price={this.props.item3.price}
->>>>>>> my-temporary-work
                   checkoutItem={data => this.props.checkoutItem(data)}
                />
             </div>
