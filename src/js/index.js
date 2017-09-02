@@ -8,6 +8,7 @@ import Header from './Header'
 import SecondPage from './SecondPage'
 import PurchasePage from './PurchasePage'
 import OrderSentPage from './OrderSentPage'
+import OrderCompleted from './OrderCompleted'
 import CounterSign from './CounterSign'
 import IPFS from 'ipfs'
 import temporaryContract from './../temporaryContract.json'
@@ -27,13 +28,12 @@ class Main extends React.Component {
          buyerData: {},
          sellerData: {},
          creatingTransaction: false,
+         showRetailers: true,
       }
    }
 
    componentDidMount(){
       this.initState.bind(this)(done => {
-
-         // this.getPendingTransactions.bind(this)()
       })
    }
 
@@ -183,6 +183,9 @@ Buyer ledger address: ${this.state.buyerData.ledger}
 Buyer wallet address: ${this.state.buyerData.walletAddress}
             `
 
+            // Save the invoice in the localstorage to have it accessible from the counter sign page
+            localStorage.setItem('invoice', invoice)
+
             const generateIpfsInstance = done => {
                ipfs.files.add(
                   new ipfs.types.Buffer(invoice)
@@ -192,7 +195,8 @@ Buyer wallet address: ${this.state.buyerData.walletAddress}
                   invoiceHashAddress = invoiceHashAddress[0].hash
 
                   this.setState({
-                     invoiceLink: `https://gateway.ipfs.io/ipfs/${invoiceHashAddress}`
+                     invoiceLink: `https://gateway.ipfs.io/ipfs/${invoiceHashAddress}`,
+                     invoiceData: invoice,
                   })
 
                   console.log('Invoice IPFS address')
@@ -260,29 +264,6 @@ Buyer wallet address: ${this.state.buyerData.walletAddress}
       })
    }
 
-   getPendingTransactions() {
-      let completedTransactions = []
-
-      this.state.ContractInstance.getInstanceAddress(web3.eth.accounts[0], (err, instance) => {
-         console.log(instance)
-         if(instance !== "0x0000000000000000000000000000000000000000"){
-            this.setState({
-               TransactionInstance: web3.eth.contract(temporaryContract.abiTransaction).at(instance)
-            }, () => {
-               this.state.TransactionInstance.invoiceHashAddress((err, invoiceHash) => {
-                  console.log(web3.toUtf8(invoiceHash))
-
-                  this.setState({
-                     invoiceLink: `https://gateway.ipfs.io/ipfs/${web3.toUtf8(invoiceHash)}`
-                  }, () => {
-                     this.context.router.history.push(LINKS.counterSign)
-                  })
-               })
-            })
-         }
-      })
-   }
-
    // To counter sign the transaction of the seller or decline it
    completeTransaction(forSeller, sellerName){
 
@@ -293,6 +274,15 @@ Buyer wallet address: ${this.state.buyerData.walletAddress}
       }, (err, result) => {
          console.log(err)
          console.log(result)
+
+         this.setState({
+            showRetailers: true
+         })
+
+         if(forSeller)
+            this.context.router.history.push(LINKS.orderCompleted)
+         else
+            this.context.router.history.push(LINKS.home + '?state=order_cancelled')
       })
    }
 
@@ -301,7 +291,9 @@ Buyer wallet address: ${this.state.buyerData.walletAddress}
          <App {...this.state}>
             <Route exact path={LINKS.home} component={HomePage} />
             <Route path={LINKS.home + LINKS.retailer} render={() => (
-               <SecondPage checkoutItem={data => this.checkoutItem(data)}
+               <SecondPage
+                  showRetailers={this.state.showRetailers}
+                  checkoutItem={data => this.checkoutItem(data)}
                />
             )} />
             <Route path={LINKS.home + LINKS.purchase} render={() => (
@@ -311,12 +303,22 @@ Buyer wallet address: ${this.state.buyerData.walletAddress}
                   acceptTransaction={() => this.acceptTransaction()}
                />
             )} />
-            <Route path={LINKS.home + LINKS.order} component={OrderSentPage} />
+            <Route path={LINKS.home + LINKS.order} render={() => (
+               <OrderSentPage
+                  hideRetailers={() => this.setState({showRetailers: false})}
+               />
+            )} />
             <Route path={LINKS.home + LINKS.counterSign} render={() => (
                <CounterSign
                   invoiceLink={this.state.invoiceLink}
+                  invoiceData={this.state.invoiceData}
                   completeTransaction={sellerName => this.completeTransaction(true, sellerName)}
                   declineFinalTransaction={() => this.completeTransaction(false)}
+               />
+            )} />
+            <Route path={LINKS.home + LINKS.orderCompleted} render={() => (
+               <OrderCompleted
+                  showRetailers={() => this.setState({showRetailers: true})}
                />
             )} />
          </App>

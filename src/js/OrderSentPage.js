@@ -19,7 +19,9 @@ class OrderSentPage extends React.Component {
 
                <div className="order-sent-buttons-container">
                   <Link to={LINKS.home} className="order-sent-back">Back to Login</Link>
-                  <Link to={LINKS.retailer} className="order-sent-login">Login as Wholesaler</Link>
+                  <Link to={LINKS.retailer}
+                     onClick={() => {this.props.hideRetailers()}}
+                     className="order-sent-login">Login as Wholesaler</Link>
                </div>
             </div>
          </div>

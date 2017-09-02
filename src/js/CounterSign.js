@@ -15,6 +15,10 @@ class CounterSign extends React.Component {
 
             <div className="sign-container">
                <p>Here is the transaction document: <a href={this.props.invoiceLink}>{this.props.invoiceLink}</a></p>
+               <pre className="sign-invoice-data">
+                  {this.props.invoiceData ? this.props.invoiceData : localStorage.getItem('invoice')}
+               </pre>
+               <div></div>
                <input type="text" placeholder="Write your name to sign the transaction" ref="transaction-input" />
 
                <button className="sign-button-confirm" onClick={() => {

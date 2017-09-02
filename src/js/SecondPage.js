@@ -40,7 +40,9 @@ class SecondPage extends React.Component {
    render(){
       return (
          <div style={{height: '100%'}}>
-            <div className="retailers-container">
+            <div
+               style={{display: this.props.showRetailers ? 'block' : 'none'}} 
+               className="retailers-container">
                <h1 className="title">Choose a Retailer</h1>
 
                <div className="icon-box-container">
@@ -247,8 +249,10 @@ class SecondPage extends React.Component {
                </div>
             </div>
 
-            <div className={
-               !this.state.isMobile && this.state.oneActive ? 'wholesalers-container expand-retailers' : 'wholesalers-container'
+            <div
+               style={{display: this.props.showRetailers ? 'none' : 'block'}}
+               className={
+                  !this.state.isMobile && this.state.oneActive ? 'wholesalers-container expand-retailers' : 'wholesalers-container'
             }>
                <h2>Wholesalers</h2>
 

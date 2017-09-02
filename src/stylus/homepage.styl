@@ -1,7 +1,7 @@
 blueColor = #5b9fbe
 greyColor = #666666
 greenColor = #91ce93
-baseUrl = '/ipns/QmRDVed784YwKrYAgiiBbh2rFGfCUemXWk3NkD7nWdstER/'
+baseUrl = '/demo/'
 
 .banner
    background-image: url(baseUrl + 'img/banner.png')
@@ -16,6 +16,28 @@ baseUrl = '/ipns/QmRDVed784YwKrYAgiiBbh2rFGfCUemXWk3NkD7nWdstER/'
    h1
       text-shadow: 0 0 10px black
       margin-top: -40px
+
+.order-cancelled
+   position: absolute
+   background-color: tomato
+   width: 50%
+   text-align: center
+   color: white
+   padding: 20px
+   left: 50%
+   transform: translateX(-50%)
+   box-shadow: 0 5px 15px 0 lightgrey
+
+   .order-cancelled-close
+      position: absolute
+      right: 0
+      margin-right: 10px
+      color: whitesmoke
+      cursor: pointer
+
+      &:hover
+         color: white
+         font-weight: bold
 
 .banner-shadow
    box-shadow: 0 10px 100px 0 rgb(168, 168, 168)
@@ -102,6 +124,10 @@ baseUrl = '/ipns/QmRDVed784YwKrYAgiiBbh2rFGfCUemXWk3NkD7nWdstER/'
 
       &:hover
          opacity: 0.8
+
+   .youtube-container
+      width: 50vh
+      max-width: 1200px
 
 @media (max-width: 750px)
    .banner
