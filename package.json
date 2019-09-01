@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "truffle test",
-    "start": "nodemon server.js"
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
